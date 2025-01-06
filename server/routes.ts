@@ -2,8 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { db } from "@db";
-import { books, posts, users, borrowings, libraries } from "@db/schema";
-import { eq, isNull, and } from "drizzle-orm";
+import { books, posts, users, borrowings, libraries, reservations } from "@db/schema";
+import { eq, and, isNull } from "drizzle-orm";
 
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
@@ -24,30 +24,151 @@ export function registerRoutes(app: Express): Server {
       const ageGroup = req.query.age as string;
       const libraryId = req.query.libraryId ? parseInt(req.query.libraryId as string) : undefined;
 
-      let query = db.select().from(books);
+      const query = db.$transaction(async (tx) => {
+        let baseQuery = tx.select().from(books).leftJoin(libraries, eq(books.libraryId, libraries.id));
 
-      if (ageGroup) {
-        query = query.where(eq(books.ageGroup, ageGroup));
+        if (ageGroup) {
+          baseQuery = baseQuery.where(eq(books.ageGroup, ageGroup));
+        }
+
+        if (libraryId) {
+          baseQuery = baseQuery.where(eq(books.libraryId, libraryId));
+        }
+
+        return baseQuery;
+      });
+
+      const results = await query;
+      const formattedResults = results.map(result => ({
+        id: result.books.id,
+        title: result.books.title,
+        author: result.books.author,
+        description: result.books.description,
+        ageGroup: result.books.ageGroup,
+        library: result.libraries,
+      }));
+
+      res.json(formattedResults);
+    } catch (error) {
+      console.error('Error fetching books:', error);
+      res.status(500).json({ error: "Failed to fetch books" });
+    }
+  });
+
+  // Reserve a book
+  app.post("/api/books/reserve", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const bookId = req.body.bookId;
+    if (!bookId) {
+      return res.status(400).json({ error: "Book ID is required" });
+    }
+
+    try {
+      // Check if book exists
+      const [book] = await db.select().from(books).where(eq(books.id, bookId));
+      if (!book) {
+        return res.status(404).json({ error: "Book not found" });
       }
 
-      if (libraryId) {
-        query = query.where(eq(books.libraryId, libraryId));
+      // Check if user already has an active reservation for this book
+      const [existingReservation] = await db
+        .select()
+        .from(reservations)
+        .where(
+          and(
+            eq(reservations.bookId, bookId),
+            eq(reservations.userId, req.user.id),
+            eq(reservations.status, 'pending')
+          )
+        );
+
+      if (existingReservation) {
+        return res.status(400).json({ error: "You already have a pending reservation for this book" });
       }
 
-      const results = await query
-        .leftJoin(libraries, eq(books.libraryId, libraries.id))
+      // Create new reservation record
+      const [reservation] = await db
+        .insert(reservations)
+        .values({
+          userId: req.user.id,
+          bookId: bookId,
+          status: 'pending',
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+        })
+        .returning();
+
+      res.json(reservation);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to reserve book" });
+    }
+  });
+
+  // Get user's reservations
+  app.get("/api/books/reserved", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    try {
+      const reservedBooks = await db
         .select({
           id: books.id,
           title: books.title,
           author: books.author,
           description: books.description,
           ageGroup: books.ageGroup,
+          reservationId: reservations.id,
+          status: reservations.status,
+          createdAt: reservations.createdAt,
+          expiresAt: reservations.expiresAt,
           library: libraries,
-        });
+        })
+        .from(reservations)
+        .leftJoin(books, eq(reservations.bookId, books.id))
+        .leftJoin(libraries, eq(books.libraryId, libraries.id))
+        .where(eq(reservations.userId, req.user.id))
+        .where(eq(reservations.status, 'pending'));
 
-      res.json(results);
+      res.json(reservedBooks);
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch books" });
+      res.status(500).json({ error: "Failed to fetch reserved books" });
+    }
+  });
+
+  // Cancel a reservation
+  app.post("/api/books/reserve/cancel", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const reservationId = req.body.reservationId;
+    if (!reservationId) {
+      return res.status(400).json({ error: "Reservation ID is required" });
+    }
+
+    try {
+      const [reservation] = await db
+        .update(reservations)
+        .set({ status: 'cancelled' })
+        .where(
+          and(
+            eq(reservations.id, reservationId),
+            eq(reservations.userId, req.user.id),
+            eq(reservations.status, 'pending')
+          )
+        )
+        .returning();
+
+      if (!reservation) {
+        return res.status(404).json({ error: "Reservation not found or already processed" });
+      }
+
+      res.json(reservation);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to cancel reservation" });
     }
   });
 
@@ -135,9 +256,9 @@ export function registerRoutes(app: Express): Server {
         userId: posts.userId,
         username: users.email,
       })
-      .from(posts)
-      .leftJoin(users, eq(posts.userId, users.id))
-      .orderBy(posts.createdAt);
+        .from(posts)
+        .leftJoin(users, eq(posts.userId, users.id))
+        .orderBy(posts.createdAt);
 
       res.json(results);
     } catch (error) {
