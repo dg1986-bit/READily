@@ -25,31 +25,26 @@ export function registerRoutes(app: Express): Server {
       const ageGroup = req.query.age as string;
       const libraryId = req.query.libraryId ? parseInt(req.query.libraryId as string) : undefined;
 
-      const query = db.$transaction(async (tx) => {
-        let baseQuery = tx.select().from(books).leftJoin(libraries, eq(books.libraryId, libraries.id));
+      let query = db.select({
+        id: books.id,
+        title: books.title,
+        author: books.author,
+        description: books.description,
+        ageGroup: books.ageGroup,
+        library: libraries,
+      }).from(books)
+        .leftJoin(libraries, eq(books.libraryId, libraries.id));
 
-        if (ageGroup) {
-          baseQuery = baseQuery.where(eq(books.ageGroup, ageGroup));
-        }
+      if (ageGroup) {
+        query = query.where(eq(books.ageGroup, ageGroup));
+      }
 
-        if (libraryId) {
-          baseQuery = baseQuery.where(eq(books.libraryId, libraryId));
-        }
-
-        return baseQuery;
-      });
+      if (libraryId) {
+        query = query.where(eq(books.libraryId, libraryId));
+      }
 
       const results = await query;
-      const formattedResults = results.map(result => ({
-        id: result.books.id,
-        title: result.books.title,
-        author: result.books.author,
-        description: result.books.description,
-        ageGroup: result.books.ageGroup,
-        library: result.libraries,
-      }));
-
-      res.json(formattedResults);
+      res.json(results);
     } catch (error) {
       console.error('Error fetching books:', error);
       res.status(500).json({ error: "Failed to fetch books" });
