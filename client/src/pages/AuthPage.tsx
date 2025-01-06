@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 type FormData = {
   email: string;
@@ -16,6 +18,7 @@ export default function AuthPage() {
   const { login, register } = useUser();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -26,17 +29,24 @@ export default function AuthPage() {
 
   const onSubmit = async (data: FormData, isLogin: boolean) => {
     setIsLoading(true);
+    setError(null); // Clear previous errors
     try {
       const result = await (isLogin ? login(data) : register(data));
       if (!result.ok) {
-        throw new Error(result.message);
+        setError(result.message);
+        if (isLogin) {
+          // Show more user-friendly messages for common login errors
+          if (result.message.includes("Incorrect email")) {
+            setError("The email address you entered isn't connected to an account.");
+          } else if (result.message.includes("Incorrect password")) {
+            setError("The password you entered is incorrect. Please try again.");
+          } else {
+            setError(result.message);
+          }
+        }
       }
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message,
-      });
+      setError(error.message);
     } finally {
       setIsLoading(false);
     }
@@ -54,6 +64,14 @@ export default function AuthPage() {
               <TabsTrigger value="login">Login</TabsTrigger>
               <TabsTrigger value="register">Register</TabsTrigger>
             </TabsList>
+
+            {error && (
+              <Alert variant="destructive" className="mt-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
             <TabsContent value="login">
               <form onSubmit={form.handleSubmit((data) => onSubmit(data, true))}>
                 <div className="space-y-4">
@@ -61,18 +79,21 @@ export default function AuthPage() {
                     type="email"
                     placeholder="Email"
                     {...form.register("email")}
+                    disabled={isLoading}
                   />
                   <Input
                     type="password"
                     placeholder="Password"
                     {...form.register("password")}
+                    disabled={isLoading}
                   />
                   <Button className="w-full" disabled={isLoading}>
-                    {isLoading ? "Loading..." : "Login"}
+                    {isLoading ? "Signing in..." : "Sign In"}
                   </Button>
                 </div>
               </form>
             </TabsContent>
+
             <TabsContent value="register">
               <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))}>
                 <div className="space-y-4">
@@ -80,14 +101,16 @@ export default function AuthPage() {
                     type="email"
                     placeholder="Email"
                     {...form.register("email")}
+                    disabled={isLoading}
                   />
                   <Input
                     type="password"
                     placeholder="Password"
                     {...form.register("password")}
+                    disabled={isLoading}
                   />
                   <Button className="w-full" disabled={isLoading}>
-                    {isLoading ? "Loading..." : "Register"}
+                    {isLoading ? "Creating account..." : "Create Account"}
                   </Button>
                 </div>
               </form>
