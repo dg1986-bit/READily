@@ -66,18 +66,23 @@ export function setupAuth(app: Express) {
           const [user] = await db
             .select()
             .from(users)
-            .where(eq(users.email, email))
-            .limit(1);
+            .where(eq(users.email, email));
 
           if (!user) {
+            console.log(`Login failed: No user found with email ${email}`);
             return done(null, false, { message: "Incorrect email." });
           }
+
           const isMatch = await crypto.compare(password, user.password);
           if (!isMatch) {
+            console.log(`Login failed: Incorrect password for user ${email}`);
             return done(null, false, { message: "Incorrect password." });
           }
+
+          console.log(`Login successful for user ${email}`);
           return done(null, user);
         } catch (err) {
+          console.error('Authentication error:', err);
           return done(err);
         }
       }
@@ -93,10 +98,16 @@ export function setupAuth(app: Express) {
       const [user] = await db
         .select()
         .from(users)
-        .where(eq(users.id, id))
-        .limit(1);
+        .where(eq(users.id, id));
+
+      if (!user) {
+        console.error(`Failed to deserialize user with id ${id}: User not found`);
+        return done(null, false);
+      }
+
       done(null, user);
     } catch (err) {
+      console.error('Error deserializing user:', err);
       done(err);
     }
   });
@@ -115,8 +126,7 @@ export function setupAuth(app: Express) {
       const [existingUser] = await db
         .select()
         .from(users)
-        .where(eq(users.email, email))
-        .limit(1);
+        .where(eq(users.email, email));
 
       if (existingUser) {
         return res.status(400).send("Email already exists");
@@ -134,6 +144,7 @@ export function setupAuth(app: Express) {
 
       req.login(newUser, (err) => {
         if (err) {
+          console.error('Error logging in after registration:', err);
           return next(err);
         }
         return res.json({
@@ -142,6 +153,7 @@ export function setupAuth(app: Express) {
         });
       });
     } catch (error) {
+      console.error('Registration error:', error);
       next(error);
     }
   });
@@ -149,6 +161,7 @@ export function setupAuth(app: Express) {
   app.post("/api/login", (req, res, next) => {
     passport.authenticate("local", (err: any, user: Express.User | false, info: IVerifyOptions | undefined) => {
       if (err) {
+        console.error('Login error:', err);
         return next(err);
       }
       if (!user) {
@@ -156,6 +169,7 @@ export function setupAuth(app: Express) {
       }
       req.login(user, (err) => {
         if (err) {
+          console.error('Error during login:', err);
           return next(err);
         }
         return res.json({
@@ -169,6 +183,7 @@ export function setupAuth(app: Express) {
   app.post("/api/logout", (req, res) => {
     req.logout((err) => {
       if (err) {
+        console.error('Logout error:', err);
         return res.status(500).send("Logout failed");
       }
       res.json({ message: "Logout successful" });

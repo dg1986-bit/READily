@@ -15,6 +15,7 @@ export function registerRoutes(app: Express): Server {
       const results = await db.select().from(libraries);
       res.json(results);
     } catch (error) {
+      console.error('Error fetching libraries:', error);
       res.status(500).json({ error: "Failed to fetch libraries" });
     }
   });
@@ -31,16 +32,21 @@ export function registerRoutes(app: Express): Server {
         author: books.author,
         description: books.description,
         ageGroup: books.ageGroup,
+        imageUrl: books.imageUrl,
         library: libraries,
       }).from(books)
         .leftJoin(libraries, eq(books.libraryId, libraries.id));
 
+      const conditions = [];
       if (ageGroup) {
-        query = query.where(eq(books.ageGroup, ageGroup));
+        conditions.push(eq(books.ageGroup, ageGroup));
+      }
+      if (libraryId) {
+        conditions.push(eq(books.libraryId, libraryId));
       }
 
-      if (libraryId) {
-        query = query.where(eq(books.libraryId, libraryId));
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
       }
 
       const results = await query;
@@ -98,6 +104,7 @@ export function registerRoutes(app: Express): Server {
 
       res.json(reservation);
     } catch (error) {
+      console.error('Error reserving book:', error);
       res.status(500).json({ error: "Failed to reserve book" });
     }
   });
@@ -130,6 +137,7 @@ export function registerRoutes(app: Express): Server {
 
       res.json(reservedBooks);
     } catch (error) {
+      console.error('Error fetching reserved books:', error);
       res.status(500).json({ error: "Failed to fetch reserved books" });
     }
   });
@@ -164,6 +172,7 @@ export function registerRoutes(app: Express): Server {
 
       res.json(reservation);
     } catch (error) {
+      console.error('Error cancelling reservation:', error);
       res.status(500).json({ error: "Failed to cancel reservation" });
     }
   });
@@ -210,6 +219,7 @@ export function registerRoutes(app: Express): Server {
 
       res.json(borrowing);
     } catch (error) {
+      console.error('Error borrowing book:', error);
       res.status(500).json({ error: "Failed to borrow book" });
     }
   });
@@ -233,11 +243,14 @@ export function registerRoutes(app: Express): Server {
         })
         .from(borrowings)
         .leftJoin(books, eq(borrowings.bookId, books.id))
-        .where(eq(borrowings.userId, req.user.id))
-        .where(eq(borrowings.status, 'borrowed'));
+        .where(and(
+          eq(borrowings.userId, req.user.id),
+          eq(borrowings.status, 'borrowed')
+        ));
 
       res.json(borrowedBooks);
     } catch (error) {
+      console.error('Error fetching borrowed books:', error);
       res.status(500).json({ error: "Failed to fetch borrowed books" });
     }
   });
@@ -250,14 +263,14 @@ export function registerRoutes(app: Express): Server {
         content: posts.content,
         createdAt: posts.createdAt,
         userId: posts.userId,
-        username: users.email, // This remains as email for now, needs schema change
+        username: users.email, // Using email as username for now
       })
         .from(posts)
-        .leftJoin(users, eq(posts.userId, users.id))
-        .orderBy(posts.createdAt);
+        .leftJoin(users, eq(posts.userId, users.id));
 
       res.json(results);
     } catch (error) {
+      console.error('Error fetching posts:', error);
       res.status(500).json({ error: "Failed to fetch posts" });
     }
   });
@@ -280,6 +293,7 @@ export function registerRoutes(app: Express): Server {
 
       res.json(post);
     } catch (error) {
+      console.error('Error creating post:', error);
       res.status(500).json({ error: "Failed to create post" });
     }
   });
