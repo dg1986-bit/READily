@@ -6,6 +6,7 @@ import { books, posts, users, borrowings, libraries, reservations } from "@db/sc
 import { eq, and, isNull } from "drizzle-orm";
 
 export function registerRoutes(app: Express): Server {
+  // First, setup authentication routes
   setupAuth(app);
 
   // Get all libraries
@@ -254,7 +255,7 @@ export function registerRoutes(app: Express): Server {
         content: posts.content,
         createdAt: posts.createdAt,
         userId: posts.userId,
-        username: users.email,
+        username: users.email, // This remains as email for now, needs schema change
       })
         .from(posts)
         .leftJoin(users, eq(posts.userId, users.id))
