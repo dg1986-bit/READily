@@ -12,10 +12,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useState } from "react";
 
 export default function BookDiscovery() {
   const [location] = useLocation();
   const { toast } = useToast();
+  const [selectedLibrary, setSelectedLibrary] = useState<string | undefined>();
 
   // Parse the age parameter from the URL
   const ageGroup = new URLSearchParams(location.split('?')[1]).get('age');
@@ -26,8 +28,18 @@ export default function BookDiscovery() {
   });
 
   const { data: books, isLoading } = useQuery<BookWithLibrary[]>({
-    queryKey: ['/api/books', ageGroup],
-    enabled: true,
+    queryKey: ['/api/books', { age: ageGroup, libraryId: selectedLibrary }],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (ageGroup) params.append('age', ageGroup);
+      if (selectedLibrary) params.append('libraryId', selectedLibrary);
+
+      const response = await fetch(`/api/books?${params.toString()}`, {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch books');
+      return response.json();
+    },
   });
 
   const handleBorrow = async (book: BookWithLibrary) => {
@@ -62,11 +74,15 @@ export default function BookDiscovery() {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Discover Books</h1>
-        <Select>
+        <Select
+          value={selectedLibrary}
+          onValueChange={(value) => setSelectedLibrary(value)}
+        >
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="All Libraries" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value={undefined}>All Libraries</SelectItem>
             {libraries?.map((library) => (
               <SelectItem key={library.id} value={library.id.toString()}>
                 {library.name}
