@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { BookWithLibrary } from "@db/schema";
-import { ImageOff } from "lucide-react";
+import { ImageOff, Loader2 } from "lucide-react";
 
 type BookCardProps = {
   book: BookWithLibrary;
@@ -16,18 +17,33 @@ type BookCardProps = {
 };
 
 export default function BookCard({ book, onBorrow }: BookCardProps) {
+  const [imageError, setImageError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
   return (
     <Card className="flex flex-col h-full">
-      <div className="relative aspect-[3/4] rounded-t-lg overflow-hidden">
-        {book.imageUrl ? (
+      <div className="relative aspect-[3/4] rounded-t-lg overflow-hidden bg-muted">
+        {book.imageUrl && !imageError ? (
           <img
             src={book.imageUrl}
             alt={`Cover of ${book.title}`}
-            className="w-full h-full object-cover"
+            className={`w-full h-full object-cover transition-opacity duration-300 ${
+              isLoading ? "opacity-0" : "opacity-100"
+            }`}
+            onLoad={() => setIsLoading(false)}
+            onError={() => {
+              setImageError(true);
+              setIsLoading(false);
+            }}
           />
         ) : (
-          <div className="w-full h-full bg-muted flex items-center justify-center">
+          <div className="w-full h-full flex items-center justify-center">
             <ImageOff className="h-12 w-12 text-muted-foreground" />
+          </div>
+        )}
+        {isLoading && book.imageUrl && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         )}
       </div>
