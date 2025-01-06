@@ -87,7 +87,6 @@ export default function BookDiscovery() {
             <SelectValue placeholder="All Libraries" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={undefined}>All Libraries</SelectItem>
             {libraries?.map((library) => (
               <SelectItem key={library.id} value={library.id.toString()}>
                 {library.name}
