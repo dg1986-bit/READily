@@ -12,18 +12,19 @@ export default function MyShelf() {
       });
       if (!response.ok) throw new Error('Failed to fetch borrowed books');
       const books = await response.json();
-      // Add necessary properties for BookCard component
+
+      // Map the API response to match BookWithLibrary type
       return books.map((book: any) => ({
         ...book,
         userBorrowing: {
           bookId: book.id,
           borrowedAt: book.borrowedAt,
+          dueDate: book.dueDate,
           status: book.status
         },
         availableCopies: 0, // Book is borrowed
         totalHolds: 0,
         estimatedWaitDays: 0,
-        library: null,
         userReservation: null
       }));
     }

@@ -363,11 +363,18 @@ export function registerRoutes(app: Express): Server {
           author: books.author,
           description: books.description,
           ageGroup: books.ageGroup,
+          imageUrl: books.imageUrl,
+          format: books.format,
+          totalCopies: books.totalCopies,
+          loanPeriodDays: books.loanPeriodDays,
           borrowedAt: borrowings.borrowedAt,
-          status: borrowings.status
+          dueDate: borrowings.dueDate,
+          status: borrowings.status,
+          library: libraries
         })
         .from(borrowings)
         .leftJoin(books, eq(borrowings.bookId, books.id))
+        .leftJoin(libraries, eq(books.libraryId, libraries.id))
         .where(and(
           eq(borrowings.userId, req.user.id),
           eq(borrowings.status, 'borrowed')
