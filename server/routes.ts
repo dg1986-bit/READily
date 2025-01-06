@@ -152,6 +152,111 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Get book details by ID
+  app.get("/api/books/:id", async (req, res) => {
+    try {
+      const bookId = parseInt(req.params.id);
+      const userId = req.user?.id;
+
+      const [book] = await db
+        .select({
+          id: books.id,
+          title: books.title,
+          author: books.author,
+          description: books.description,
+          ageGroup: books.ageGroup,
+          imageUrl: books.imageUrl,
+          format: books.format,
+          totalCopies: books.totalCopies,
+          loanPeriodDays: books.loanPeriodDays,
+          library: libraries,
+        })
+        .from(books)
+        .leftJoin(libraries, eq(books.libraryId, libraries.id))
+        .where(eq(books.id, bookId));
+
+      if (!book) {
+        return res.status(404).json({ error: "Book not found" });
+      }
+
+      // Get current active borrowings count
+      const [{ activeBorrowings }] = await db
+        .select({
+          activeBorrowings: count(),
+        })
+        .from(borrowings)
+        .where(
+          and(
+            eq(borrowings.bookId, book.id),
+            eq(borrowings.status, 'borrowed')
+          )
+        );
+
+      // Get hold queue length
+      const [{ holdCount }] = await db
+        .select({
+          holdCount: count(),
+        })
+        .from(reservations)
+        .where(
+          and(
+            eq(reservations.bookId, book.id),
+            eq(reservations.status, 'pending')
+          )
+        );
+
+      // Get user's current borrowing if any
+      let userBorrowing = null;
+      if (userId) {
+        const [currentBorrowing] = await db
+          .select()
+          .from(borrowings)
+          .where(
+            and(
+              eq(borrowings.bookId, book.id),
+              eq(borrowings.userId, userId),
+              eq(borrowings.status, 'borrowed')
+            )
+          );
+        userBorrowing = currentBorrowing;
+      }
+
+      // Get user's current reservation if any
+      let userReservation = null;
+      if (userId) {
+        const [currentReservation] = await db
+          .select()
+          .from(reservations)
+          .where(
+            and(
+              eq(reservations.bookId, book.id),
+              eq(reservations.userId, userId),
+              eq(reservations.status, 'pending')
+            )
+          );
+        userReservation = currentReservation;
+      }
+
+      const availableCopies = book.totalCopies - activeBorrowings;
+      // Estimate wait time based on loan period and number of holds
+      const estimatedWaitDays = holdCount > 0 && availableCopies === 0
+        ? Math.ceil((holdCount * book.loanPeriodDays) / book.totalCopies)
+        : 0;
+
+      res.json({
+        ...book,
+        availableCopies,
+        totalHolds: holdCount,
+        estimatedWaitDays,
+        userBorrowing,
+        userReservation,
+      });
+    } catch (error) {
+      console.error('Error fetching book details:', error);
+      res.status(500).json({ error: "Failed to fetch book details" });
+    }
+  });
+
   // Reserve a book
   app.post("/api/books/reserve", async (req, res) => {
     if (!req.user) {

@@ -25,6 +25,7 @@ import { BookWithLibrary } from "@db/schema";
 import { ImageOff, Loader2, Clock, Info, BookOpen, CalendarClock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format, addDays } from "date-fns";
+import { useLocation } from "wouter";
 
 type BookCardProps = {
   book: BookWithLibrary;
@@ -38,6 +39,7 @@ export default function BookCard({ book, onBorrow }: BookCardProps) {
   const [isReserving, setIsReserving] = useState(false);
   const [showBorrowDialog, setShowBorrowDialog] = useState(false);
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   const handleImageLoad = () => setIsLoading(false);
   const handleImageError = () => {
@@ -167,7 +169,10 @@ export default function BookCard({ book, onBorrow }: BookCardProps) {
 
   return (
     <>
-      <Card className="flex flex-col h-full">
+      <Card
+        className="flex flex-col h-full cursor-pointer hover:shadow-lg transition-shadow duration-200"
+        onClick={() => setLocation(`/books/${book.id}`)}
+      >
         <div className="relative aspect-[3/4] rounded-t-lg overflow-hidden bg-muted">
           {book.imageUrl && !imageError ? (
             <img
