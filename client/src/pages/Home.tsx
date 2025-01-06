@@ -8,7 +8,7 @@ export default function Home() {
     <div className="space-y-8">
       <section className="text-center space-y-4">
         <h1 className="text-4xl font-bold text-gray-900">Welcome to Library Nest</h1>
-        <p className="text-xl text-gray-600">Your family's gateway to endless stories</p>
+        <p className="text-xl text-gray-600">Effortless borrowing, endless stories — your family's gateway to unlimited adventure.</p>
       </section>
 
       <section className="grid grid-cols-1 md:grid-cols-2 gap-8 py-8">
