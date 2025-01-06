@@ -18,6 +18,15 @@ export const books = pgTable("books", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const borrowings = pgTable("borrowings", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  bookId: integer("book_id").references(() => books.id).notNull(),
+  borrowedAt: timestamp("borrowed_at").defaultNow(),
+  returnedAt: timestamp("returned_at"),
+  status: text("status").notNull().default('borrowed'), // 'borrowed' or 'returned'
+});
+
 export const posts = pgTable("posts", {
   id: serial("id").primaryKey(),
   content: text("content").notNull(),
@@ -27,6 +36,11 @@ export const posts = pgTable("posts", {
 
 export const usersRelations = relations(users, ({ many }) => ({
   posts: many(posts),
+  borrowings: many(borrowings),
+}));
+
+export const booksRelations = relations(books, ({ many }) => ({
+  borrowings: many(borrowings),
 }));
 
 export const insertUserSchema = createInsertSchema(users);
@@ -37,6 +51,7 @@ export type InsertUser = typeof users.$inferInsert;
 export type SelectUser = typeof users.$inferSelect;
 export type Book = typeof books.$inferSelect;
 export type Post = typeof posts.$inferSelect;
+export type Borrowing = typeof borrowings.$inferSelect;
 
 // Add type for user with relation
 export interface PostWithUser extends Post {

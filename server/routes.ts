@@ -2,8 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { db } from "@db";
-import { books, posts, users } from "@db/schema";
-import { eq } from "drizzle-orm";
+import { books, posts, users, borrowings } from "@db/schema";
+import { eq, isNull } from "drizzle-orm";
 
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
@@ -23,6 +23,80 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Borrow a book
+  app.post("/api/books/borrow", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const bookId = req.body.bookId;
+    if (!bookId) {
+      return res.status(400).json({ error: "Book ID is required" });
+    }
+
+    try {
+      // Check if book exists
+      const [book] = await db.select().from(books).where(eq(books.id, bookId));
+      if (!book) {
+        return res.status(404).json({ error: "Book not found" });
+      }
+
+      // Check if book is already borrowed by this user
+      const [existingBorrowing] = await db
+        .select()
+        .from(borrowings)
+        .where(eq(borrowings.bookId, bookId))
+        .where(eq(borrowings.userId, req.user.id))
+        .where(eq(borrowings.status, 'borrowed'));
+
+      if (existingBorrowing) {
+        return res.status(400).json({ error: "You have already borrowed this book" });
+      }
+
+      // Create new borrowing record
+      const [borrowing] = await db
+        .insert(borrowings)
+        .values({
+          userId: req.user.id,
+          bookId: bookId,
+          status: 'borrowed'
+        })
+        .returning();
+
+      res.json(borrowing);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to borrow book" });
+    }
+  });
+
+  // Get user's borrowed books
+  app.get("/api/books/borrowed", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    try {
+      const borrowedBooks = await db
+        .select({
+          id: books.id,
+          title: books.title,
+          author: books.author,
+          description: books.description,
+          ageGroup: books.ageGroup,
+          borrowedAt: borrowings.borrowedAt,
+          status: borrowings.status
+        })
+        .from(borrowings)
+        .leftJoin(books, eq(borrowings.bookId, books.id))
+        .where(eq(borrowings.userId, req.user.id))
+        .where(eq(borrowings.status, 'borrowed'));
+
+      res.json(borrowedBooks);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch borrowed books" });
+    }
+  });
+
   // Get community posts with user information
   app.get("/api/posts", async (req, res) => {
     try {
@@ -31,7 +105,7 @@ export function registerRoutes(app: Express): Server {
         content: posts.content,
         createdAt: posts.createdAt,
         userId: posts.userId,
-        username: users.username,
+        username: users.email,
       })
       .from(posts)
       .leftJoin(users, eq(posts.userId, users.id))
