@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { db } from "@db";
 import { books, posts, users, borrowings, libraries, reservations } from "@db/schema";
-import { eq, and, isNull, count, lt, gte } from "drizzle-orm";
+import { eq, and, isNull, count, lt, gte, ilike, or } from "drizzle-orm";
 import { addDays } from "date-fns";
 
 export function registerRoutes(app: Express): Server {
@@ -26,6 +26,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const ageGroup = req.query.age as string;
       const libraryId = req.query.libraryId ? parseInt(req.query.libraryId as string) : undefined;
+      const searchQuery = req.query.search as string;
       const userId = req.user?.id;
 
       // First get the books
@@ -49,6 +50,14 @@ export function registerRoutes(app: Express): Server {
       }
       if (libraryId) {
         conditions.push(eq(books.libraryId, libraryId));
+      }
+      if (searchQuery) {
+        conditions.push(
+          or(
+            ilike(books.title, `%${searchQuery}%`),
+            ilike(books.author, `%${searchQuery}%`)
+          )
+        );
       }
 
       if (conditions.length > 0) {

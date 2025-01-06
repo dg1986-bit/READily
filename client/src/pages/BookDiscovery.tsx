@@ -12,13 +12,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Search } from "lucide-react";
 
 export default function BookDiscovery() {
   const [location] = useLocation();
   const { toast } = useToast();
   const [selectedLibrary, setSelectedLibrary] = useState<string | undefined>();
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Parse the age parameter from the URL
   const ageGroup = new URLSearchParams(location.split('?')[1]).get('age');
@@ -29,11 +31,12 @@ export default function BookDiscovery() {
   });
 
   const { data: books, isLoading } = useQuery<BookWithLibrary[]>({
-    queryKey: ['/api/books', { age: ageGroup, libraryId: selectedLibrary }],
+    queryKey: ['/api/books', { age: ageGroup, libraryId: selectedLibrary, search: searchQuery }],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (ageGroup) params.append('age', ageGroup);
       if (selectedLibrary) params.append('libraryId', selectedLibrary);
+      if (searchQuery) params.append('search', searchQuery);
 
       const response = await fetch(`/api/books?${params.toString()}`, {
         credentials: 'include'
@@ -77,23 +80,36 @@ export default function BookDiscovery() {
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center">
+      <div className="space-y-4">
         <h1 className="text-3xl font-bold">Discover Books</h1>
-        <Select
-          value={selectedLibrary}
-          onValueChange={(value) => setSelectedLibrary(value)}
-        >
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="All Libraries" />
-          </SelectTrigger>
-          <SelectContent>
-            {libraries?.map((library) => (
-              <SelectItem key={library.id} value={library.id.toString()}>
-                {library.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search books by title or author..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <Select
+            value={selectedLibrary}
+            onValueChange={(value) => setSelectedLibrary(value === "all" ? undefined : value)}
+          >
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="All Libraries" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Libraries</SelectItem>
+              {libraries?.map((library) => (
+                <SelectItem key={library.id} value={library.id.toString()}>
+                  {library.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {stage && (
@@ -107,9 +123,11 @@ export default function BookDiscovery() {
           <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground" />
           <h3 className="mt-4 text-lg font-semibold">No books found</h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            {selectedLibraryName
-              ? `${selectedLibraryName} currently has no books available${ageGroup ? ` for ${developmentalStages[ageGroup].ageRange}` : ''}`
-              : `No books available${ageGroup ? ` for ${developmentalStages[ageGroup].ageRange}` : ''}`}
+            {searchQuery
+              ? `No books matching "${searchQuery}"`
+              : selectedLibraryName
+                ? `${selectedLibraryName} currently has no books available${ageGroup ? ` for ${developmentalStages[ageGroup].ageRange}` : ''}`
+                : `No books available${ageGroup ? ` for ${developmentalStages[ageGroup].ageRange}` : ''}`}
           </p>
         </div>
       )}
