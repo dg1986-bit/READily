@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
+import { AlertCircle } from "lucide-react";
 
 export default function BookDiscovery() {
   const [location] = useLocation();
@@ -70,6 +71,10 @@ export default function BookDiscovery() {
     return <div>Loading...</div>;
   }
 
+  const selectedLibraryName = selectedLibrary 
+    ? libraries?.find(lib => lib.id.toString() === selectedLibrary)?.name 
+    : null;
+
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
@@ -98,15 +103,29 @@ export default function BookDiscovery() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {books?.map((book) => (
-          <BookCard
-            key={book.id}
-            book={book}
-            onBorrow={handleBorrow}
-          />
-        ))}
-      </div>
+      {(!books || books.length === 0) && (
+        <div className="text-center py-8">
+          <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground" />
+          <h3 className="mt-4 text-lg font-semibold">No books found</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {selectedLibraryName
+              ? `${selectedLibraryName} currently has no books available${ageGroup ? ` for ${developmentalStages[ageGroup].ageRange}` : ''}`
+              : `No books available${ageGroup ? ` for ${developmentalStages[ageGroup].ageRange}` : ''}`}
+          </p>
+        </div>
+      )}
+
+      {books && books.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {books.map((book) => (
+            <BookCard
+              key={book.id}
+              book={book}
+              onBorrow={handleBorrow}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
