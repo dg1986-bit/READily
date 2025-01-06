@@ -3,7 +3,8 @@ import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { db } from "@db";
 import { books, posts, users, borrowings, libraries, reservations } from "@db/schema";
-import { eq, and, isNull } from "drizzle-orm";
+import { eq, and, isNull, count, lt, gte } from "drizzle-orm";
+import { addDays } from "date-fns";
 
 export function registerRoutes(app: Express): Server {
   // First, setup authentication routes
@@ -25,7 +26,9 @@ export function registerRoutes(app: Express): Server {
     try {
       const ageGroup = req.query.age as string;
       const libraryId = req.query.libraryId ? parseInt(req.query.libraryId as string) : undefined;
+      const userId = req.user?.id;
 
+      // First get the books
       let query = db.select({
         id: books.id,
         title: books.title,
@@ -33,6 +36,9 @@ export function registerRoutes(app: Express): Server {
         description: books.description,
         ageGroup: books.ageGroup,
         imageUrl: books.imageUrl,
+        format: books.format,
+        totalCopies: books.totalCopies,
+        loanPeriodDays: books.loanPeriodDays,
         library: libraries,
       }).from(books)
         .leftJoin(libraries, eq(books.libraryId, libraries.id));
@@ -49,8 +55,88 @@ export function registerRoutes(app: Express): Server {
         query = query.where(and(...conditions));
       }
 
-      const results = await query;
-      res.json(results);
+      const booksResult = await query;
+
+      // For each book, get availability information
+      const booksWithAvailability = await Promise.all(
+        booksResult.map(async (book) => {
+          // Get current active borrowings count
+          const [{ activeBorrowings }] = await db
+            .select({
+              activeBorrowings: count(),
+            })
+            .from(borrowings)
+            .where(
+              and(
+                eq(borrowings.bookId, book.id),
+                eq(borrowings.status, 'borrowed')
+              )
+            );
+
+          // Get hold queue length
+          const [{ holdCount }] = await db
+            .select({
+              holdCount: count(),
+            })
+            .from(reservations)
+            .where(
+              and(
+                eq(reservations.bookId, book.id),
+                eq(reservations.status, 'pending')
+              )
+            );
+
+          // Get user's current borrowing if any
+          let userBorrowing = null;
+          if (userId) {
+            const [currentBorrowing] = await db
+              .select()
+              .from(borrowings)
+              .where(
+                and(
+                  eq(borrowings.bookId, book.id),
+                  eq(borrowings.userId, userId),
+                  eq(borrowings.status, 'borrowed')
+                )
+              );
+            userBorrowing = currentBorrowing;
+          }
+
+          // Get user's current reservation if any
+          let userReservation = null;
+          if (userId) {
+            const [currentReservation] = await db
+              .select()
+              .from(reservations)
+              .where(
+                and(
+                  eq(reservations.bookId, book.id),
+                  eq(reservations.userId, userId),
+                  eq(reservations.status, 'pending')
+                )
+              );
+            userReservation = currentReservation;
+          }
+
+          const availableCopies = book.totalCopies - activeBorrowings;
+          // Estimate wait time: assume each borrowing takes the full loan period
+          // and divide by number of copies to get average wait
+          const estimatedWaitDays = holdCount > 0 && availableCopies === 0
+            ? Math.ceil((holdCount * book.loanPeriodDays) / book.totalCopies)
+            : 0;
+
+          return {
+            ...book,
+            availableCopies,
+            totalHolds: holdCount,
+            estimatedWaitDays,
+            userBorrowing,
+            userReservation,
+          };
+        })
+      );
+
+      res.json(booksWithAvailability);
     } catch (error) {
       console.error('Error fetching books:', error);
       res.status(500).json({ error: "Failed to fetch books" });
@@ -189,12 +275,9 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      // Check if book exists
+      // Get book details
       const [book] = await db
-        .select({
-          id: books.id,
-          title: books.title,
-        })
+        .select()
         .from(books)
         .where(eq(books.id, bookId));
 
@@ -203,7 +286,7 @@ export function registerRoutes(app: Express): Server {
         return res.status(404).json({ error: "Book not found" });
       }
 
-      // Check if book is already borrowed by this user
+      // Check if user already has this book borrowed
       const [existingBorrowing] = await db
         .select()
         .from(borrowings)
@@ -220,6 +303,26 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ error: "You have already borrowed this book" });
       }
 
+      // Check book availability
+      const [{ activeBorrowings }] = await db
+        .select({
+          activeBorrowings: count(),
+        })
+        .from(borrowings)
+        .where(
+          and(
+            eq(borrowings.bookId, bookId),
+            eq(borrowings.status, 'borrowed')
+          )
+        );
+
+      if (activeBorrowings >= book.totalCopies) {
+        return res.status(400).json({ error: "No copies available. Please join the wait list." });
+      }
+
+      // Calculate due date based on loan period
+      const dueDate = addDays(new Date(), book.loanPeriodDays);
+
       // Create new borrowing record
       const [borrowing] = await db
         .insert(borrowings)
@@ -228,11 +331,18 @@ export function registerRoutes(app: Express): Server {
           bookId: bookId,
           status: 'borrowed',
           borrowedAt: new Date(),
+          dueDate: dueDate,
         })
         .returning();
 
       console.log(`Successfully created borrowing record: ${JSON.stringify(borrowing)}`);
-      res.json({ message: "Book borrowed successfully", borrowing });
+      res.json({
+        message: "Book borrowed successfully",
+        borrowing: {
+          ...borrowing,
+          dueDate: dueDate.toISOString(),
+        },
+      });
     } catch (error) {
       console.error('Error borrowing book:', error);
       res.status(500).json({ error: "Failed to borrow book" });

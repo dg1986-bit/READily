@@ -8,9 +8,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { BookWithLibrary } from "@db/schema";
-import { ImageOff, Loader2 } from "lucide-react";
+import { ImageOff, Loader2, Clock, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
 
 type BookCardProps = {
   book: BookWithLibrary;
@@ -49,7 +56,7 @@ export default function BookCard({ book }: BookCardProps) {
 
       toast({
         title: "Success",
-        description: `You have successfully borrowed "${book.title}"`,
+        description: `You have borrowed "${book.title}". Due date: ${format(new Date(data.borrowing.dueDate), 'PPP')}`,
       });
     } catch (error: any) {
       console.error('Error borrowing book:', error);
@@ -62,6 +69,36 @@ export default function BookCard({ book }: BookCardProps) {
       setIsBorrowing(false);
     }
   };
+
+  const getAvailabilityStatus = () => {
+    if (book.userBorrowing) {
+      return {
+        label: `Due ${format(new Date(book.userBorrowing.dueDate), 'PP')}`,
+        color: 'text-blue-600 bg-blue-50',
+      };
+    }
+
+    if (book.availableCopies && book.availableCopies > 0) {
+      return {
+        label: 'Available',
+        color: 'text-green-600 bg-green-50',
+      };
+    }
+
+    if (book.totalHolds && book.totalHolds > 0) {
+      return {
+        label: 'Wait List',
+        color: 'text-amber-600 bg-amber-50',
+      };
+    }
+
+    return {
+      label: 'Unavailable',
+      color: 'text-red-600 bg-red-50',
+    };
+  };
+
+  const status = getAvailabilityStatus();
 
   return (
     <Card className="flex flex-col h-full">
@@ -88,7 +125,12 @@ export default function BookCard({ book }: BookCardProps) {
         )}
       </div>
       <CardHeader>
-        <CardTitle className="line-clamp-1">{book.title}</CardTitle>
+        <div className="flex justify-between items-start gap-2">
+          <CardTitle className="line-clamp-1">{book.title}</CardTitle>
+          <span className={`text-xs font-medium px-2 py-1 rounded-full ${status.color}`}>
+            {status.label}
+          </span>
+        </div>
         <CardDescription>By {book.author}</CardDescription>
       </CardHeader>
       <CardContent className="flex-1">
@@ -102,19 +144,49 @@ export default function BookCard({ book }: BookCardProps) {
               Available at: {book.library.name}
             </p>
           )}
+          {book.format !== 'physical' && (
+            <p className="text-xs text-gray-500 capitalize">
+              Format: {book.format}
+            </p>
+          )}
+          {book.totalHolds !== undefined && book.totalHolds > 0 && (
+            <div className="flex items-center gap-1 text-xs text-gray-500">
+              <Clock className="h-3 w-3" />
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger className="flex items-center gap-1">
+                    <span>
+                      {book.estimatedWaitDays} day wait
+                    </span>
+                    <Info className="h-3 w-3" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>
+                      {book.totalHolds} {book.totalHolds === 1 ? 'person' : 'people'} waiting
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          )}
         </div>
       </CardContent>
       <CardFooter>
         <Button
           className="w-full"
           onClick={handleBorrow}
-          disabled={isBorrowing}
+          disabled={isBorrowing || book.availableCopies === 0 || book.userBorrowing !== null}
+          variant={book.availableCopies === 0 ? "outline" : "default"}
         >
           {isBorrowing ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Borrowing...
             </>
+          ) : book.userBorrowing ? (
+            "Currently Borrowed"
+          ) : book.availableCopies === 0 ? (
+            "Join Wait List"
           ) : (
             "Borrow"
           )}
