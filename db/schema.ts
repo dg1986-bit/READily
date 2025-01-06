@@ -23,6 +23,7 @@ export const books = pgTable("books", {
   title: text("title").notNull(),
   author: text("author").notNull(),
   description: text("description").notNull(),
+  imageUrl: text("image_url"),
   ageGroup: text("age_group").notNull(),
   libraryId: integer("library_id").references(() => libraries.id),
   isbn: text("isbn").unique(),
