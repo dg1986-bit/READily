@@ -20,6 +20,17 @@ export default function BookCard({ book, onBorrow }: BookCardProps) {
   const [imageError, setImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  const handleImageLoad = () => {
+    console.log(`Image loaded successfully for book: ${book.title}`);
+    setIsLoading(false);
+  };
+
+  const handleImageError = () => {
+    console.error(`Failed to load image for book: ${book.title}, URL: ${book.imageUrl}`);
+    setImageError(true);
+    setIsLoading(false);
+  };
+
   return (
     <Card className="flex flex-col h-full">
       <div className="relative aspect-[3/4] rounded-t-lg overflow-hidden bg-muted">
@@ -30,11 +41,8 @@ export default function BookCard({ book, onBorrow }: BookCardProps) {
             className={`w-full h-full object-cover transition-opacity duration-300 ${
               isLoading ? "opacity-0" : "opacity-100"
             }`}
-            onLoad={() => setIsLoading(false)}
-            onError={() => {
-              setImageError(true);
-              setIsLoading(false);
-            }}
+            onLoad={handleImageLoad}
+            onError={handleImageError}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
