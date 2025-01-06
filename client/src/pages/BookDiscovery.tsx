@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import BookCard from "@/components/BookCard";
-import { Book, Library } from "@db/schema";
+import { BookWithLibrary, Library } from "@db/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import DevelopmentalStageInfo from "@/components/DevelopmentalStageInfo";
+import { developmentalStages } from "@/lib/developmental-stages";
 import {
   Select,
   SelectContent,
@@ -17,17 +19,18 @@ export default function BookDiscovery() {
 
   // Parse the age parameter from the URL
   const ageGroup = new URLSearchParams(location.split('?')[1]).get('age');
+  const stage = ageGroup ? developmentalStages[ageGroup] : null;
 
   const { data: libraries } = useQuery<Library[]>({
     queryKey: ['/api/libraries'],
   });
 
-  const { data: books, isLoading } = useQuery<Book[]>({
+  const { data: books, isLoading } = useQuery<BookWithLibrary[]>({
     queryKey: ['/api/books', ageGroup],
     enabled: true,
   });
 
-  const handleBorrow = async (book: Book) => {
+  const handleBorrow = async (book: BookWithLibrary) => {
     try {
       const res = await fetch('/api/books/borrow', {
         method: 'POST',
@@ -56,7 +59,7 @@ export default function BookDiscovery() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Discover Books</h1>
         <Select>
@@ -72,6 +75,13 @@ export default function BookDiscovery() {
           </SelectContent>
         </Select>
       </div>
+
+      {stage && (
+        <div className="my-8">
+          <DevelopmentalStageInfo stage={stage} />
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {books?.map((book) => (
           <BookCard
