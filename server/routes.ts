@@ -2,21 +2,49 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { db } from "@db";
-import { books, posts, users, borrowings } from "@db/schema";
-import { eq, isNull } from "drizzle-orm";
+import { books, posts, users, borrowings, libraries } from "@db/schema";
+import { eq, isNull, and } from "drizzle-orm";
 
 export function registerRoutes(app: Express): Server {
   setupAuth(app);
 
-  // Get books with optional age group filter
+  // Get all libraries
+  app.get("/api/libraries", async (_req, res) => {
+    try {
+      const results = await db.select().from(libraries);
+      res.json(results);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch libraries" });
+    }
+  });
+
+  // Get books with optional age group and library filters
   app.get("/api/books", async (req, res) => {
     try {
       const ageGroup = req.query.age as string;
-      const query = ageGroup
-        ? db.select().from(books).where(eq(books.ageGroup, ageGroup))
-        : db.select().from(books);
+      const libraryId = req.query.libraryId ? parseInt(req.query.libraryId as string) : undefined;
 
-      const results = await query;
+      let query = db.select().from(books);
+
+      if (ageGroup) {
+        query = query.where(eq(books.ageGroup, ageGroup));
+      }
+
+      if (libraryId) {
+        query = query.where(eq(books.libraryId, libraryId));
+      }
+
+      const results = await query
+        .leftJoin(libraries, eq(books.libraryId, libraries.id))
+        .select({
+          id: books.id,
+          title: books.title,
+          author: books.author,
+          description: books.description,
+          ageGroup: books.ageGroup,
+          library: libraries,
+        });
+
       res.json(results);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch books" });

@@ -9,12 +9,24 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const libraries = pgTable("libraries", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  address: text("address"),
+  website: text("website"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const books = pgTable("books", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   author: text("author").notNull(),
   description: text("description").notNull(),
   ageGroup: text("age_group").notNull(),
+  libraryId: integer("library_id").references(() => libraries.id),
+  isbn: text("isbn"),
+  language: text("language"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -39,16 +51,27 @@ export const usersRelations = relations(users, ({ many }) => ({
   borrowings: many(borrowings),
 }));
 
-export const booksRelations = relations(books, ({ many }) => ({
+export const booksRelations = relations(books, ({ many, one }) => ({
   borrowings: many(borrowings),
+  library: one(libraries, {
+    fields: [books.libraryId],
+    references: [libraries.id],
+  }),
+}));
+
+export const librariesRelations = relations(libraries, ({ many }) => ({
+  books: many(books),
 }));
 
 export const insertUserSchema = createInsertSchema(users);
 export const selectUserSchema = createSelectSchema(users);
+export const insertLibrarySchema = createInsertSchema(libraries);
+export const selectLibrarySchema = createSelectSchema(libraries);
 
 // Export the types for use in our application
 export type InsertUser = typeof users.$inferInsert;
 export type SelectUser = typeof users.$inferSelect;
+export type Library = typeof libraries.$inferSelect;
 export type Book = typeof books.$inferSelect;
 export type Post = typeof posts.$inferSelect;
 export type Borrowing = typeof borrowings.$inferSelect;
@@ -56,4 +79,8 @@ export type Borrowing = typeof borrowings.$inferSelect;
 // Add type for user with relation
 export interface PostWithUser extends Post {
   user: SelectUser;
+}
+
+export interface BookWithLibrary extends Book {
+  library: Library;
 }

@@ -7,11 +7,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Book } from "@db/schema";
+import { BookWithLibrary } from "@db/schema";
 
 type BookCardProps = {
-  book: Book;
-  onBorrow?: (book: Book) => void;
+  book: BookWithLibrary;
+  onBorrow?: (book: BookWithLibrary) => void;
 };
 
 export default function BookCard({ book, onBorrow }: BookCardProps) {
@@ -23,10 +23,15 @@ export default function BookCard({ book, onBorrow }: BookCardProps) {
       </CardHeader>
       <CardContent>
         <p className="text-sm text-gray-600 line-clamp-3">{book.description}</p>
-        <div className="mt-2">
+        <div className="mt-2 space-y-2">
           <span className="text-xs font-medium bg-primary/10 text-primary rounded-full px-2 py-1">
             {book.ageGroup}
           </span>
+          {book.library && (
+            <p className="text-xs text-gray-500">
+              Available at: {book.library.name}
+            </p>
+          )}
         </div>
       </CardContent>
       <CardFooter>
