@@ -5,6 +5,7 @@ import AuthPage from "./pages/AuthPage";
 import Home from "./pages/Home";
 import BookDiscovery from "./pages/BookDiscovery";
 import Community from "./pages/Community";
+import MyShelf from "./pages/MyShelf";
 import NavigationBar from "./components/NavigationBar";
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/discover" component={BookDiscovery} />
+          <Route path="/shelf" component={MyShelf} />
           <Route path="/community" component={Community} />
         </Switch>
       </main>

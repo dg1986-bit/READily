@@ -16,6 +16,9 @@ export default function NavigationBar() {
             <Link href="/discover">
               <a className="text-gray-600 hover:text-gray-900">Discover</a>
             </Link>
+            <Link href="/shelf">
+              <a className="text-gray-600 hover:text-gray-900">My Shelf</a>
+            </Link>
             <Link href="/community">
               <a className="text-gray-600 hover:text-gray-900">Community</a>
             </Link>
