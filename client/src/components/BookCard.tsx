@@ -23,12 +23,10 @@ export default function BookCard({ book }: BookCardProps) {
   const { toast } = useToast();
 
   const handleImageLoad = () => {
-    console.log(`Image loaded successfully for book: ${book.title}`);
     setIsLoading(false);
   };
 
   const handleImageError = () => {
-    console.error(`Failed to load image for book: ${book.title}, URL: ${book.imageUrl}`);
     setImageError(true);
     setIsLoading(false);
   };
@@ -43,9 +41,10 @@ export default function BookCard({ book }: BookCardProps) {
         credentials: 'include',
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.error || 'Failed to borrow book');
+        throw new Error(data.error || 'Failed to borrow book');
       }
 
       toast({
@@ -53,6 +52,7 @@ export default function BookCard({ book }: BookCardProps) {
         description: `You have successfully borrowed "${book.title}"`,
       });
     } catch (error: any) {
+      console.error('Error borrowing book:', error);
       toast({
         variant: "destructive",
         title: "Error",

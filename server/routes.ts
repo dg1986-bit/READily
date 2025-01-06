@@ -190,8 +190,16 @@ export function registerRoutes(app: Express): Server {
 
     try {
       // Check if book exists
-      const [book] = await db.select().from(books).where(eq(books.id, bookId));
+      const [book] = await db
+        .select({
+          id: books.id,
+          title: books.title,
+        })
+        .from(books)
+        .where(eq(books.id, bookId));
+
       if (!book) {
+        console.error(`Book not found with ID: ${bookId}`);
         return res.status(404).json({ error: "Book not found" });
       }
 
@@ -208,6 +216,7 @@ export function registerRoutes(app: Express): Server {
         );
 
       if (existingBorrowing) {
+        console.error(`User ${req.user.id} already has book ${bookId} borrowed`);
         return res.status(400).json({ error: "You have already borrowed this book" });
       }
 
@@ -217,11 +226,13 @@ export function registerRoutes(app: Express): Server {
         .values({
           userId: req.user.id,
           bookId: bookId,
-          status: 'borrowed'
+          status: 'borrowed',
+          borrowedAt: new Date(),
         })
         .returning();
 
-      res.json(borrowing);
+      console.log(`Successfully created borrowing record: ${JSON.stringify(borrowing)}`);
+      res.json({ message: "Book borrowed successfully", borrowing });
     } catch (error) {
       console.error('Error borrowing book:', error);
       res.status(500).json({ error: "Failed to borrow book" });
