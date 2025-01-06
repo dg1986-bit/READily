@@ -10,17 +10,17 @@ export default function NavigationBar() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center space-x-8">
           <Link href="/">
-            <a className="text-xl font-bold text-primary">Library Nest</a>
+            <span className="text-xl font-bold text-primary cursor-pointer">Library Nest</span>
           </Link>
           <div className="hidden md:flex space-x-4">
             <Link href="/discover">
-              <a className="text-gray-600 hover:text-gray-900">Discover</a>
+              <span className="text-gray-600 hover:text-gray-900 cursor-pointer">Discover</span>
             </Link>
             <Link href="/shelf">
-              <a className="text-gray-600 hover:text-gray-900">My Shelf</a>
+              <span className="text-gray-600 hover:text-gray-900 cursor-pointer">My Shelf</span>
             </Link>
             <Link href="/community">
-              <a className="text-gray-600 hover:text-gray-900">Community</a>
+              <span className="text-gray-600 hover:text-gray-900 cursor-pointer">Community</span>
             </Link>
           </div>
         </div>

@@ -6,6 +6,27 @@ import { Loader2 } from "lucide-react";
 export default function MyShelf() {
   const { data: borrowedBooks, isLoading, refetch } = useQuery<BookWithLibrary[]>({
     queryKey: ['/api/books/borrowed'],
+    queryFn: async () => {
+      const response = await fetch('/api/books/borrowed', {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch borrowed books');
+      const books = await response.json();
+      // Add necessary properties for BookCard component
+      return books.map((book: any) => ({
+        ...book,
+        userBorrowing: {
+          bookId: book.id,
+          borrowedAt: book.borrowedAt,
+          status: book.status
+        },
+        availableCopies: 0, // Book is borrowed
+        totalHolds: 0,
+        estimatedWaitDays: 0,
+        library: null,
+        userReservation: null
+      }));
+    }
   });
 
   if (isLoading) {
