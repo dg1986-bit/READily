@@ -110,14 +110,28 @@ export default function BookCard({ book, onBorrow }: BookCardProps) {
 
   const getBorrowingStatus = () => {
     if (book.userBorrowing) {
-      const dueDate = new Date(book.userBorrowing.dueDate);
-      const daysUntilDue = Math.ceil((dueDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-      const status = daysUntilDue <= 3 ? 'text-red-600 bg-red-50' : 'text-blue-600 bg-blue-50';
-      return {
-        label: `Due ${format(dueDate, 'PP')}`,
-        sublabel: daysUntilDue <= 3 ? 'Due soon' : undefined,
-        color: status,
-      };
+      try {
+        const dueDate = new Date(book.userBorrowing.dueDate);
+        if (isNaN(dueDate.getTime())) {
+          return {
+            label: 'Due date unavailable',
+            color: 'text-gray-600 bg-gray-50',
+          };
+        }
+        const daysUntilDue = Math.ceil((dueDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+        const status = daysUntilDue <= 3 ? 'text-red-600 bg-red-50' : 'text-blue-600 bg-blue-50';
+        return {
+          label: `Due ${format(dueDate, 'PP')}`,
+          sublabel: daysUntilDue <= 3 ? 'Due soon' : undefined,
+          color: status,
+        };
+      } catch (e) {
+        console.error('Error parsing due date:', e);
+        return {
+          label: 'Due date unavailable',
+          color: 'text-gray-600 bg-gray-50',
+        };
+      }
     }
 
     if (book.userReservation) {

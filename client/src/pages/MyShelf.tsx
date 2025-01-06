@@ -19,7 +19,7 @@ export default function MyShelf() {
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-bold">My Shelf</h1>
-      
+
       {(!borrowedBooks || borrowedBooks.length === 0) ? (
         <div className="text-center py-12">
           <p className="text-muted-foreground">You haven't borrowed any books yet.</p>
@@ -30,7 +30,9 @@ export default function MyShelf() {
             <BookCard
               key={book.id}
               book={book}
-              onBorrow={() => refetch()}
+              onBorrow={async () => {
+                await refetch();
+              }}
             />
           ))}
         </div>
