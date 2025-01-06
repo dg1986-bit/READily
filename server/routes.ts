@@ -199,9 +199,13 @@ export function registerRoutes(app: Express): Server {
       const [existingBorrowing] = await db
         .select()
         .from(borrowings)
-        .where(eq(borrowings.bookId, bookId))
-        .where(eq(borrowings.userId, req.user.id))
-        .where(eq(borrowings.status, 'borrowed'));
+        .where(
+          and(
+            eq(borrowings.bookId, bookId),
+            eq(borrowings.userId, req.user.id),
+            eq(borrowings.status, 'borrowed')
+          )
+        );
 
       if (existingBorrowing) {
         return res.status(400).json({ error: "You have already borrowed this book" });

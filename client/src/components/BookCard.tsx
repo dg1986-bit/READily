@@ -10,15 +10,17 @@ import {
 } from "@/components/ui/card";
 import { BookWithLibrary } from "@db/schema";
 import { ImageOff, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 type BookCardProps = {
   book: BookWithLibrary;
-  onBorrow?: (book: BookWithLibrary) => void;
 };
 
-export default function BookCard({ book, onBorrow }: BookCardProps) {
+export default function BookCard({ book }: BookCardProps) {
   const [imageError, setImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isBorrowing, setIsBorrowing] = useState(false);
+  const { toast } = useToast();
 
   const handleImageLoad = () => {
     console.log(`Image loaded successfully for book: ${book.title}`);
@@ -29,6 +31,36 @@ export default function BookCard({ book, onBorrow }: BookCardProps) {
     console.error(`Failed to load image for book: ${book.title}, URL: ${book.imageUrl}`);
     setImageError(true);
     setIsLoading(false);
+  };
+
+  const handleBorrow = async () => {
+    setIsBorrowing(true);
+    try {
+      const res = await fetch('/api/books/borrow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookId: book.id }),
+        credentials: 'include',
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to borrow book');
+      }
+
+      toast({
+        title: "Success",
+        description: `You have successfully borrowed "${book.title}"`,
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
+      });
+    } finally {
+      setIsBorrowing(false);
+    }
   };
 
   return (
@@ -75,9 +107,17 @@ export default function BookCard({ book, onBorrow }: BookCardProps) {
       <CardFooter>
         <Button
           className="w-full"
-          onClick={() => onBorrow?.(book)}
+          onClick={handleBorrow}
+          disabled={isBorrowing}
         >
-          Borrow
+          {isBorrowing ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Borrowing...
+            </>
+          ) : (
+            "Borrow"
+          )}
         </Button>
       </CardFooter>
     </Card>
