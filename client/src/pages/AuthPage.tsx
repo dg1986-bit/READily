@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type FormData = {
-  username: string;
+  email: string;
   password: string;
 };
 
@@ -19,7 +19,7 @@ export default function AuthPage() {
 
   const form = useForm<FormData>({
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
     },
   });
@@ -58,8 +58,9 @@ export default function AuthPage() {
               <form onSubmit={form.handleSubmit((data) => onSubmit(data, true))}>
                 <div className="space-y-4">
                   <Input
-                    placeholder="Username"
-                    {...form.register("username")}
+                    type="email"
+                    placeholder="Email"
+                    {...form.register("email")}
                   />
                   <Input
                     type="password"
@@ -76,8 +77,9 @@ export default function AuthPage() {
               <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))}>
                 <div className="space-y-4">
                   <Input
-                    placeholder="Username"
-                    {...form.register("username")}
+                    type="email"
+                    placeholder="Email"
+                    {...form.register("email")}
                   />
                   <Input
                     type="password"

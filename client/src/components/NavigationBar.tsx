@@ -22,7 +22,7 @@ export default function NavigationBar() {
           </div>
         </div>
         <div className="flex items-center space-x-4">
-          <span className="text-gray-600">Hi, {user?.username}</span>
+          <span className="text-gray-600">Hi, {user?.email}</span>
           <Button variant="ghost" onClick={() => logout()}>
             Logout
           </Button>
