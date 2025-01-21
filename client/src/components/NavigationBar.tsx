@@ -5,6 +5,9 @@ import { useUser } from "@/hooks/use-user";
 export default function NavigationBar() {
   const { user, logout } = useUser();
 
+  // Add console log to debug user object
+  console.log("NavigationBar user:", user);
+
   return (
     <nav className="border-b bg-white">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -27,7 +30,9 @@ export default function NavigationBar() {
         <div className="flex items-center space-x-4">
           {user ? (
             <>
-              <span className="text-gray-600">Hi, {user.firstName}</span>
+              <span className="text-gray-600">
+                Hi, {user.firstName || user.email}
+              </span>
               <Button variant="ghost" onClick={() => logout()}>
                 Logout
               </Button>
