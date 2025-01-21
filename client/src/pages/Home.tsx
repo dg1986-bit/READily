@@ -30,7 +30,7 @@ export default function Home() {
 
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8">
         <div className="p-6 bg-white rounded-lg shadow-sm border">
-          <h3 className="text-xl font-semibold mb-2">Age-Appropriate</h3>
+          <h3 className="text-xl font-semibold mb-2">Age-Appropriate Personalized Recommendations</h3>
           <p className="text-gray-600">Curated selections for every developmental stage</p>
         </div>
         <div className="p-6 bg-white rounded-lg shadow-sm border">
