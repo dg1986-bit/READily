@@ -31,7 +31,7 @@ export const books = pgTable("books", {
   totalCopies: integer("total_copies").notNull().default(1),
   format: text("format").notNull().default('physical'), // physical, ebook, audiobook
   loanPeriodDays: integer("loan_period_days").notNull().default(21),
-  categories: text("categories"), // JSON string array of category IDs
+  subject: text("subject"), // Changed from categories to subject
   createdAt: timestamp("created_at").defaultNow(),
 });
 

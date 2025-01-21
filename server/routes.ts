@@ -41,7 +41,7 @@ export function registerRoutes(app: Express): Server {
         totalCopies: books.totalCopies,
         loanPeriodDays: books.loanPeriodDays,
         library: libraries,
-        categories: books.categories,
+        subject: books.subject, // Updated from categories to subject
       }).from(books)
         .leftJoin(libraries, eq(books.libraryId, libraries.id));
 
@@ -70,8 +70,8 @@ export function registerRoutes(app: Express): Server {
       // Filter by categories if specified
       if (categories.length > 0) {
         booksResult = booksResult.filter(book => {
-          const bookCategories = book.categories ? JSON.parse(book.categories) : [];
-          return categories.some(category => bookCategories.includes(category));
+          const bookSubjects = book.subject ? JSON.parse(book.subject) : []; // Updated from categories to subject
+          return categories.some(category => bookSubjects.includes(category));
         });
       }
 
