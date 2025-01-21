@@ -26,6 +26,7 @@ import { ImageOff, Loader2, Clock, Info, BookOpen, CalendarClock } from "lucide-
 import { useToast } from "@/hooks/use-toast";
 import { format, addDays } from "date-fns";
 import { useLocation } from "wouter";
+import { developmentalStages } from "@/lib/developmental-stages";
 
 type BookCardProps = {
   book: BookWithLibrary;
@@ -215,7 +216,7 @@ export default function BookCard({ book, onBorrow }: BookCardProps) {
           <p className="text-sm text-gray-600 line-clamp-3">{book.description}</p>
           <div className="mt-2 space-y-2">
             <span className="text-xs font-medium bg-primary/10 text-primary rounded-full px-2 py-1">
-              {book.ageGroup}
+              {developmentalStages[book.ageGroup]?.ageRange || book.ageGroup}
             </span>
             {book.library && (
               <p className="text-xs text-gray-500">

@@ -16,13 +16,13 @@ export default function BookDiscovery() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
-  // Parse the age parameter from the URL
+  // Parse the age parameter from the URL and map it to the backend value
   const ageGroup = new URLSearchParams(location.split('?')[1]).get('age');
   const stage = ageGroup ? developmentalStages[ageGroup] : null;
 
   const { data: books, isLoading } = useQuery<BookWithLibrary[]>({
     queryKey: ['/api/books', { 
-      age: ageGroup, 
+      age: ageGroup,  // Pass the age group directly since it now matches the backend
       search: searchQuery,
       categories: selectedCategories 
     }],
@@ -38,7 +38,6 @@ export default function BookDiscovery() {
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to fetch books');
-
       return response.json();
     },
   });
