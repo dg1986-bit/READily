@@ -20,9 +20,10 @@ function App() {
     );
   }
 
-  // Auth page is now a standalone route instead of a redirect
-  if (location.pathname === '/auth') {
-    return <AuthPage />;
+  // If user is already logged in and tries to access /auth, redirect to home
+  if (user && location.pathname === '/auth') {
+    window.location.href = '/';
+    return null;
   }
 
   return (
