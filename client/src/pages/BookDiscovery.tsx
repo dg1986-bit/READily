@@ -16,13 +16,12 @@ export default function BookDiscovery() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
-  // Parse the age parameter from the URL and map it to the backend value
+  // Parse the age parameter from the URL 
   const ageGroup = new URLSearchParams(location.split('?')[1]).get('age');
-  const stage = ageGroup ? developmentalStages[ageGroup] : null;
 
   const { data: books, isLoading } = useQuery<BookWithLibrary[]>({
     queryKey: ['/api/books', { 
-      age: ageGroup,  // Pass the age group directly since it now matches the backend
+      age: ageGroup,
       search: searchQuery,
       categories: selectedCategories 
     }],
@@ -86,16 +85,11 @@ export default function BookDiscovery() {
         </div>
       </div>
 
-      {stage && (
-        <div className="my-8">
-          <DevelopmentalStageInfo stage={stage} />
-        </div>
-      )}
-
       <div className="flex gap-6">
         <CategoryFilter
           selectedCategories={selectedCategories}
           onCategoriesChange={setSelectedCategories}
+          currentAgeGroup={ageGroup}
         />
 
         <div className="flex-1">
@@ -106,7 +100,7 @@ export default function BookDiscovery() {
               <p className="mt-2 text-sm text-muted-foreground">
                 {searchQuery
                   ? `No books matching "${searchQuery}"`
-                  : `No books available${ageGroup ? ` for ${developmentalStages[ageGroup].ageRange}` : ''}`}
+                  : `No books available${ageGroup ? ` for ${ageGroup}` : ''}`}
               </p>
             </div>
           )}

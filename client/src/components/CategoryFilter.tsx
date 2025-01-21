@@ -16,6 +16,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { MenuIcon } from "lucide-react";
+import { useLocation } from "wouter";
 
 type CategoryItem = {
   id: string;
@@ -31,14 +32,17 @@ type Category = {
 type CategoryFilterProps = {
   selectedCategories: string[];
   onCategoriesChange: (categories: string[]) => void;
+  currentAgeGroup?: string | null;
 };
 
 export default function CategoryFilter({
   selectedCategories,
   onCategoriesChange,
+  currentAgeGroup,
 }: CategoryFilterProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     fetch('/data/categories.json')
@@ -47,11 +51,17 @@ export default function CategoryFilter({
       .catch(error => console.error('Error loading categories:', error));
   }, []);
 
-  const toggleCategory = (itemId: string) => {
-    const newSelection = selectedCategories.includes(itemId)
-      ? selectedCategories.filter(id => id !== itemId)
-      : [...selectedCategories, itemId];
-    onCategoriesChange(newSelection);
+  const handleItemClick = (categoryId: string, itemId: string) => {
+    if (categoryId === 'age-group') {
+      // For age groups, navigate to the new URL
+      setLocation(`/discover?age=${encodeURIComponent(itemId)}`);
+    } else {
+      // For other categories, toggle selection
+      const newSelection = selectedCategories.includes(itemId)
+        ? selectedCategories.filter(id => id !== itemId)
+        : [...selectedCategories, itemId];
+      onCategoriesChange(newSelection);
+    }
   };
 
   const CategoryList = () => (
@@ -63,24 +73,31 @@ export default function CategoryFilter({
           </AccordionTrigger>
           <AccordionContent>
             <div className="space-y-2 pl-4">
-              {category.items.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center space-x-2"
-                >
-                  <Checkbox
-                    id={item.id}
-                    checked={selectedCategories.includes(item.id)}
-                    onCheckedChange={() => toggleCategory(item.id)}
-                  />
-                  <label
-                    htmlFor={item.id}
-                    className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              {category.items.map((item) => {
+                // For age groups, check against currentAgeGroup
+                const isChecked = category.id === 'age-group'
+                  ? currentAgeGroup === item.id
+                  : selectedCategories.includes(item.id);
+
+                return (
+                  <div
+                    key={item.id}
+                    className="flex items-center space-x-2"
                   >
-                    {item.name}
-                  </label>
-                </div>
-              ))}
+                    <Checkbox
+                      id={item.id}
+                      checked={isChecked}
+                      onCheckedChange={() => handleItemClick(category.id, item.id)}
+                    />
+                    <label
+                      htmlFor={item.id}
+                      className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      {item.name}
+                    </label>
+                  </div>
+                );
+              })}
             </div>
           </AccordionContent>
         </AccordionItem>
