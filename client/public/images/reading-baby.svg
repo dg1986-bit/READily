@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="600" fill="#f8f9fa"/>
+  
+  <!-- Baby -->
+  <circle cx="400" cy="250" r="120" fill="#FFE0B2"/>
+  <!-- Face features -->
+  <circle cx="360" cy="230" r="12" fill="#4A4A4A"/>
+  <circle cx="440" cy="230" r="12" fill="#4A4A4A"/>
+  <path d="M 340 280 Q 400 320 460 280" fill="none" stroke="#4A4A4A" stroke-width="6"/>
+  
+  <!-- Book -->
+  <rect x="200" y="350" width="400" height="200" fill="#FF7043" rx="15"/>
+  <rect x="220" y="370" width="360" height="160" fill="#FFFFFF" rx="10"/>
+  
+  <!-- Pop-up elements -->
+  <path d="M 250 450 L 400 380 L 550 450" fill="#FFB74D" stroke="#FF9800" stroke-width="3"/>
+  <circle cx="400" cy="420" r="30" fill="#81C784"/>
+  <path d="M 360 420 L 440 420" stroke="#4CAF50" stroke-width="3"/>
+  
+  <!-- Baby's hands -->
+  <path d="M 150 400 Q 200 350 250 400" fill="none" stroke="#FFE0B2" stroke-width="25"/>
+  <path d="M 550 400 Q 600 350 650 400" fill="none" stroke="#FFE0B2" stroke-width="25"/>
+</svg>
