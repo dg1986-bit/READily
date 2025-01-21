@@ -10,6 +10,14 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { AlertCircle, Search } from "lucide-react";
 
+const AGE_GROUP_MAPPING: Record<string, string> = {
+  'infant': '0-2 years',
+  'toddler': '0-2 years',
+  'preschool': '3-5 years',
+  'early-reader': '6-8 years',
+  'middle-grade': '9-12 years'
+};
+
 export default function BookDiscovery() {
   const [location] = useLocation();
   const { toast } = useToast();
@@ -19,7 +27,6 @@ export default function BookDiscovery() {
   // Parse the age parameter from the URL
   const ageGroup = new URLSearchParams(location.split('?')[1]).get('age');
   const stage = ageGroup ? developmentalStages[ageGroup] : null;
-
 
   const { data: books, isLoading } = useQuery<BookWithLibrary[]>({
     queryKey: ['/api/books', { 
@@ -39,7 +46,13 @@ export default function BookDiscovery() {
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to fetch books');
-      return response.json();
+
+      const booksData = await response.json();
+      // Map the age groups to our standardized categories
+      return booksData.map((book: BookWithLibrary) => ({
+        ...book,
+        ageGroup: AGE_GROUP_MAPPING[book.ageGroup] || book.ageGroup
+      }));
     },
   });
 
