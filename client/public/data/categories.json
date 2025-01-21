@@ -1,0 +1,288 @@
+[
+  {
+    "id": "library",
+    "name": "Library",
+    "items": [
+      {
+        "id": "national-library-of-thailand",
+        "name": "National Library of Thailand"
+      },
+      {
+        "id": "bangkok-city-library",
+        "name": "Bangkok City Library"
+      },
+      {
+        "id": "thailand-creative-design-center-tcdc-",
+        "name": "Thailand Creative & Design Center (TCDC)"
+      },
+      {
+        "id": "thailand-knowledge-park-tk-park-",
+        "name": "Thailand Knowledge Park (TK Park)"
+      },
+      {
+        "id": "goethe-institut-thailand-library",
+        "name": "Goethe-Institut Thailand Library"
+      },
+      {
+        "id": "alliance-fran-aise-bangkok-media-library",
+        "name": "Alliance Française Bangkok Media Library"
+      },
+      {
+        "id": "bacc-art-library",
+        "name": "BACC Art Library"
+      },
+      {
+        "id": "neilson-hays-library",
+        "name": "Neilson Hays Library"
+      },
+      {
+        "id": "bank-of-thailand-library",
+        "name": "Bank of Thailand Library"
+      },
+      {
+        "id": "pridi-banomyong-library",
+        "name": "Pridi Banomyong Library"
+      },
+      {
+        "id": "the-reading-room",
+        "name": "The Reading Room"
+      },
+      {
+        "id": "william-warren-library",
+        "name": "William Warren Library"
+      }
+    ]
+  },
+  {
+    "id": "age-group",
+    "name": "Age Group",
+    "items": [
+      {
+        "id": "0-2-years",
+        "name": "0-2 years"
+      },
+      {
+        "id": "3-5-years",
+        "name": "3-5 years"
+      },
+      {
+        "id": "6-8-years",
+        "name": "6-8 years"
+      },
+      {
+        "id": "9-12-years",
+        "name": "9-12 years"
+      }
+    ]
+  },
+  {
+    "id": "new-books",
+    "name": "New books",
+    "items": [
+      {
+        "id": "within-1-month",
+        "name": "within 1 month"
+      },
+      {
+        "id": "within-past-3-months",
+        "name": "within past 3 months"
+      },
+      {
+        "id": "within-past-6-months",
+        "name": "within past 6 months"
+      },
+      {
+        "id": "within-past-year",
+        "name": "within past year"
+      },
+      {
+        "id": "over-1-year",
+        "name": "over 1 year"
+      }
+    ]
+  },
+  {
+    "id": "highly-recommended",
+    "name": "Highly recommended",
+    "items": [
+      {
+        "id": "5-stars",
+        "name": "5 stars"
+      },
+      {
+        "id": "4-stars",
+        "name": "4 stars"
+      },
+      {
+        "id": "3-stars",
+        "name": "3 stars"
+      },
+      {
+        "id": "2-stars",
+        "name": "2 stars"
+      },
+      {
+        "id": "1-star",
+        "name": "1 star"
+      },
+      {
+        "id": "0-stars",
+        "name": "0 stars"
+      }
+    ]
+  },
+  {
+    "id": "availability",
+    "name": "Availability",
+    "items": [
+      {
+        "id": "available-now",
+        "name": "Available now"
+      },
+      {
+        "id": "coming-soon",
+        "name": "Coming soon"
+      }
+    ]
+  },
+  {
+    "id": "subject",
+    "name": "Subject",
+    "items": [
+      {
+        "id": "nonfiction",
+        "name": "Nonfiction"
+      },
+      {
+        "id": "fiction",
+        "name": "Fiction"
+      },
+      {
+        "id": "food-drinks",
+        "name": "Food & Drinks"
+      },
+      {
+        "id": "health-body",
+        "name": "Health & Body"
+      },
+      {
+        "id": "crafts",
+        "name": "Crafts"
+      },
+      {
+        "id": "travel",
+        "name": "Travel"
+      },
+      {
+        "id": "science",
+        "name": "Science"
+      },
+      {
+        "id": "fantasy",
+        "name": "Fantasy"
+      },
+      {
+        "id": "cars-motorcycles",
+        "name": "Cars & Motorcycles"
+      },
+      {
+        "id": "airplanes-aviation",
+        "name": "Airplanes & Aviation"
+      },
+      {
+        "id": "boating-naval",
+        "name": "Boating & Naval"
+      },
+      {
+        "id": "technology",
+        "name": "Technology"
+      },
+      {
+        "id": "biography",
+        "name": "Biography"
+      },
+      {
+        "id": "sports",
+        "name": "Sports"
+      },
+      {
+        "id": "art-architecture",
+        "name": "Art & Architecture"
+      },
+      {
+        "id": "history",
+        "name": "History"
+      },
+      {
+        "id": "fashion",
+        "name": "Fashion"
+      },
+      {
+        "id": "nature",
+        "name": "Nature"
+      },
+      {
+        "id": "language-arts",
+        "name": "Language Arts"
+      },
+      {
+        "id": "psychology-feelings",
+        "name": "Psychology & feelings"
+      },
+      {
+        "id": "picture-book",
+        "name": "Picture book"
+      },
+      {
+        "id": "music",
+        "name": "Music"
+      },
+      {
+        "id": "religion-spirituality",
+        "name": "Religion & Spirituality"
+      },
+      {
+        "id": "family-relationships",
+        "name": "Family & Relationships"
+      },
+      {
+        "id": "money-economics",
+        "name": "Money & Economics"
+      },
+      {
+        "id": "beginning-reader",
+        "name": "Beginning Reader"
+      },
+      {
+        "id": "medical",
+        "name": "Medical"
+      },
+      {
+        "id": "games",
+        "name": "Games"
+      },
+      {
+        "id": "mathematics",
+        "name": "Mathematics"
+      },
+      {
+        "id": "animals",
+        "name": "Animals"
+      }
+    ]
+  },
+  {
+    "id": "language",
+    "name": "Language",
+    "items": [
+      {
+        "id": "english",
+        "name": "English"
+      },
+      {
+        "id": "thai",
+        "name": "Thai"
+      }
+    ]
+  }
+]

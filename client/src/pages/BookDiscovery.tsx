@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import BookCard from "@/components/BookCard";
+import CategoryFilter from "@/components/CategoryFilter";
 import { BookWithLibrary, Library } from "@db/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -21,6 +22,7 @@ export default function BookDiscovery() {
   const { toast } = useToast();
   const [selectedLibrary, setSelectedLibrary] = useState<string | undefined>();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   // Parse the age parameter from the URL
   const ageGroup = new URLSearchParams(location.split('?')[1]).get('age');
@@ -31,12 +33,20 @@ export default function BookDiscovery() {
   });
 
   const { data: books, isLoading } = useQuery<BookWithLibrary[]>({
-    queryKey: ['/api/books', { age: ageGroup, libraryId: selectedLibrary, search: searchQuery }],
+    queryKey: ['/api/books', { 
+      age: ageGroup, 
+      libraryId: selectedLibrary, 
+      search: searchQuery,
+      categories: selectedCategories 
+    }],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (ageGroup) params.append('age', ageGroup);
       if (selectedLibrary) params.append('libraryId', selectedLibrary);
       if (searchQuery) params.append('search', searchQuery);
+      if (selectedCategories.length > 0) {
+        params.append('categories', selectedCategories.join(','));
+      }
 
       const response = await fetch(`/api/books?${params.toString()}`, {
         credentials: 'include'
@@ -118,31 +128,40 @@ export default function BookDiscovery() {
         </div>
       )}
 
-      {(!books || books.length === 0) && (
-        <div className="text-center py-8">
-          <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground" />
-          <h3 className="mt-4 text-lg font-semibold">No books found</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {searchQuery
-              ? `No books matching "${searchQuery}"`
-              : selectedLibraryName
-                ? `${selectedLibraryName} currently has no books available${ageGroup ? ` for ${developmentalStages[ageGroup].ageRange}` : ''}`
-                : `No books available${ageGroup ? ` for ${developmentalStages[ageGroup].ageRange}` : ''}`}
-          </p>
-        </div>
-      )}
+      <div className="flex gap-6">
+        <CategoryFilter
+          selectedCategories={selectedCategories}
+          onCategoriesChange={setSelectedCategories}
+        />
 
-      {books && books.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {books.map((book) => (
-            <BookCard
-              key={book.id}
-              book={book}
-              onBorrow={handleBorrow}
-            />
-          ))}
+        <div className="flex-1">
+          {(!books || books.length === 0) && (
+            <div className="text-center py-8">
+              <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground" />
+              <h3 className="mt-4 text-lg font-semibold">No books found</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {searchQuery
+                  ? `No books matching "${searchQuery}"`
+                  : selectedLibraryName
+                    ? `${selectedLibraryName} currently has no books available${ageGroup ? ` for ${developmentalStages[ageGroup].ageRange}` : ''}`
+                    : `No books available${ageGroup ? ` for ${developmentalStages[ageGroup].ageRange}` : ''}`}
+              </p>
+            </div>
+          )}
+
+          {books && books.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {books.map((book) => (
+                <BookCard
+                  key={book.id}
+                  book={book}
+                  onBorrow={handleBorrow}
+                />
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
