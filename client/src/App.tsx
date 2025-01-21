@@ -20,7 +20,8 @@ function App() {
     );
   }
 
-  if (!user) {
+  // Auth page is now a standalone route instead of a redirect
+  if (location.pathname === '/auth') {
     return <AuthPage />;
   }
 
@@ -32,8 +33,14 @@ function App() {
           <Route path="/" component={Home} />
           <Route path="/discover" component={BookDiscovery} />
           <Route path="/books/:id" component={BookDetails} />
-          <Route path="/shelf" component={MyShelf} />
-          <Route path="/community" component={Community} />
+          {/* Protected routes - require login */}
+          <Route path="/shelf">
+            {user ? <MyShelf /> : <AuthPage />}
+          </Route>
+          <Route path="/community">
+            {user ? <Community /> : <AuthPage />}
+          </Route>
+          <Route path="/auth" component={AuthPage} />
         </Switch>
       </main>
     </div>

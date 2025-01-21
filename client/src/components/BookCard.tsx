@@ -26,7 +26,8 @@ import { ImageOff, Loader2, Clock, Info, BookOpen, CalendarClock } from "lucide-
 import { useToast } from "@/hooks/use-toast";
 import { format, addDays } from "date-fns";
 import { useLocation } from "wouter";
-//import { developmentalStages } from "@/lib/developmental-stages";
+import { useUser } from "@/hooks/use-user"; // Import useUser hook
+
 
 type BookCardProps = {
   book: BookWithLibrary;
@@ -41,6 +42,7 @@ export default function BookCard({ book, onBorrow }: BookCardProps) {
   const [showBorrowDialog, setShowBorrowDialog] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const { user } = useUser();
 
   const handleImageLoad = () => setIsLoading(false);
   const handleImageError = () => {
@@ -166,6 +168,30 @@ export default function BookCard({ book, onBorrow }: BookCardProps) {
     };
   };
 
+  const handleBorrowClick = () => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to borrow books",
+      });
+      setLocation('/auth');
+      return;
+    }
+    setShowBorrowDialog(true);
+  };
+
+  const handleReserveClick = () => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to join the wait list",
+      });
+      setLocation('/auth');
+      return;
+    }
+    handleReserve();
+  };
+
   const status = getBorrowingStatus();
 
   return (
@@ -272,11 +298,12 @@ export default function BookCard({ book, onBorrow }: BookCardProps) {
           ) : (
             <Button
               className="w-full"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation(); 
                 if (book.availableCopies && book.availableCopies > 0) {
-                  setShowBorrowDialog(true);
+                  handleBorrowClick();
                 } else {
-                  handleReserve();
+                  handleReserveClick();
                 }
               }}
               disabled={isBorrowing || isReserving}
