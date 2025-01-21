@@ -39,7 +39,7 @@ export default function Home() {
         </div>
         <div className="p-6 bg-white rounded-lg shadow-sm border">
           <h3 className="text-xl font-semibold mb-2">Easy Borrowing</h3>
-          <p className="text-gray-600">Seamless library integration and notifications</p>
+          <p className="text-gray-600">Seamless integration of library collections, due date notifications, and book delivery</p>
         </div>
       </section>
     </div>
