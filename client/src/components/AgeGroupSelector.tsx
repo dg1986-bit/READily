@@ -5,10 +5,10 @@ export default function AgeGroupSelector() {
   const [, setLocation] = useLocation();
 
   const ageGroups = [
-    { label: "0-2 years", value: "infant" },
-    { label: "3-5 years", value: "preschool" },
-    { label: "6-8 years", value: "early-reader" },
-    { label: "9-12 years", value: "middle-grade" },
+    { label: "0-2 years", value: "0-2 years" },
+    { label: "3-5 years", value: "3-5 years" },
+    { label: "6-8 years", value: "6-8 years" },
+    { label: "9-12 years", value: "9-12 years" },
   ];
 
   return (
