@@ -10,14 +10,6 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { AlertCircle, Search } from "lucide-react";
 
-const AGE_GROUP_MAPPING: Record<string, string[]> = {
-  'infant': ['0-2 years'],
-  'toddler': ['0-2 years'],
-  'preschool': ['3-5 years'],
-  'early-reader': ['6-8 years'],
-  'middle-grade': ['9-12 years']
-};
-
 export default function BookDiscovery() {
   const [location] = useLocation();
   const { toast } = useToast();
@@ -47,14 +39,7 @@ export default function BookDiscovery() {
       });
       if (!response.ok) throw new Error('Failed to fetch books');
 
-      const booksData = await response.json();
-
-      // Map the stored age groups to displayed format
-      return booksData.map((book: BookWithLibrary) => ({
-        ...book,
-        ageGroup: Object.entries(AGE_GROUP_MAPPING)
-          .find(([key]) => key === book.ageGroup)?.[1]?.[0] || book.ageGroup
-      }));
+      return response.json();
     },
   });
 
