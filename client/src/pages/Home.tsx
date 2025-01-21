@@ -34,8 +34,8 @@ export default function Home() {
           <p className="text-gray-600">Curated picks for every stage to guide new moms in nurturing their baby's brain development</p>
         </div>
         <div className="p-6 bg-white rounded-lg shadow-sm border">
-          <h3 className="text-xl font-semibold mb-2">Community</h3>
-          <p className="text-gray-600">Connect with other moms and share recommendations</p>
+          <h3 className="text-xl font-semibold mb-2">Moms Together</h3>
+          <p className="text-gray-600">A space for moms to unite, share helpful recommendations, and support each other in their child's growth</p>
         </div>
         <div className="p-6 bg-white rounded-lg shadow-sm border">
           <h3 className="text-xl font-semibold mb-2">Easy Borrowing</h3>
