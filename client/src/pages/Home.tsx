@@ -14,9 +14,9 @@ export default function Home() {
       <section className="grid grid-cols-1 md:grid-cols-2 gap-8 py-8">
         <div className="relative overflow-hidden rounded-xl bg-white shadow-sm">
           <img
-            src="/images/reading-baby.svg"
-            alt="Baby enjoying a pop-up book"
-            className="w-full h-[300px] object-contain"
+            src="/images/reading-baby.jpg"
+            alt="Child reading a book"
+            className="w-full h-[300px] object-cover"
           />
         </div>
         <div className="flex flex-col justify-center space-y-4">
