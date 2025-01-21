@@ -46,9 +46,17 @@ export function registerRoutes(app: Express): Server {
         .leftJoin(libraries, eq(books.libraryId, libraries.id));
 
       const conditions = [];
+
+      // Handle age group filtering
       if (ageGroup) {
-        conditions.push(eq(books.ageGroup, ageGroup));
+        conditions.push(
+          or(
+            eq(books.ageGroup, 'infant'),
+            eq(books.ageGroup, 'toddler')
+          )
+        );
       }
+
       if (searchQuery) {
         conditions.push(
           or(
