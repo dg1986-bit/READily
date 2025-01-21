@@ -14,8 +14,8 @@ export default function Home() {
       <section className="grid grid-cols-1 md:grid-cols-2 gap-8 py-8">
         <div className="relative overflow-hidden rounded-xl">
           <img
-            src="https://images.unsplash.com/photo-1589642380614-4a8c2147b857"
-            alt="Baby enjoying a pop-up book"
+            src="https://images.unsplash.com/photo-1537185055792-a54585f4ff2f"
+            alt="Baby enjoying a colorful book"
             className="w-full h-[300px] object-cover"
           />
         </div>
