@@ -25,11 +25,11 @@ export function registerRoutes(app: Express): Server {
   app.get("/api/books", async (req, res) => {
     try {
       const ageGroup = req.query.age as string;
-      const libraryId = req.query.libraryId ? parseInt(req.query.libraryId as string) : undefined;
       const searchQuery = req.query.search as string;
+      const categories = req.query.categories ? (req.query.categories as string).split(',') : [];
       const userId = req.user?.id;
 
-      // First get the books
+      // First get the books with library info
       let query = db.select({
         id: books.id,
         title: books.title,
@@ -41,15 +41,13 @@ export function registerRoutes(app: Express): Server {
         totalCopies: books.totalCopies,
         loanPeriodDays: books.loanPeriodDays,
         library: libraries,
+        categories: books.categories,
       }).from(books)
         .leftJoin(libraries, eq(books.libraryId, libraries.id));
 
       const conditions = [];
       if (ageGroup) {
         conditions.push(eq(books.ageGroup, ageGroup));
-      }
-      if (libraryId) {
-        conditions.push(eq(books.libraryId, libraryId));
       }
       if (searchQuery) {
         conditions.push(
@@ -64,7 +62,15 @@ export function registerRoutes(app: Express): Server {
         query = query.where(and(...conditions));
       }
 
-      const booksResult = await query;
+      let booksResult = await query;
+
+      // Filter by categories if specified
+      if (categories.length > 0) {
+        booksResult = booksResult.filter(book => {
+          const bookCategories = book.categories ? JSON.parse(book.categories) : [];
+          return categories.some(category => bookCategories.includes(category));
+        });
+      }
 
       // For each book, get availability information
       const booksWithAvailability = await Promise.all(
@@ -128,8 +134,6 @@ export function registerRoutes(app: Express): Server {
           }
 
           const availableCopies = book.totalCopies - activeBorrowings;
-          // Estimate wait time: assume each borrowing takes the full loan period
-          // and divide by number of copies to get average wait
           const estimatedWaitDays = holdCount > 0 && availableCopies === 0
             ? Math.ceil((holdCount * book.loanPeriodDays) / book.totalCopies)
             : 0;
