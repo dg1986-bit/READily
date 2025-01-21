@@ -5,10 +5,108 @@ import { db } from "@db";
 import { books, posts, users, borrowings, libraries, reservations } from "@db/schema";
 import { eq, and, isNull, count, lt, gte, ilike, or } from "drizzle-orm";
 import { addDays } from "date-fns";
+import { scrypt, randomBytes, timingSafeEqual } from "crypto";
+import { promisify } from "util";
+
+const scryptAsync = promisify(scrypt);
+
+const crypto = {
+  hash: async (password: string) => {
+    const salt = randomBytes(16).toString("hex");
+    const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+    return `${buf.toString("hex")}.${salt}`;
+  },
+  compare: async (suppliedPassword: string, storedPassword: string) => {
+    const [hashedPassword, salt] = storedPassword.split(".");
+    const hashedPasswordBuf = Buffer.from(hashedPassword, "hex");
+    const suppliedPasswordBuf = (await scryptAsync(
+      suppliedPassword,
+      salt,
+      64
+    )) as Buffer;
+    return timingSafeEqual(hashedPasswordBuf, suppliedPasswordBuf);
+  },
+};
 
 export function registerRoutes(app: Express): Server {
   // First, setup authentication routes
   setupAuth(app);
+
+  // Update user profile
+  app.put("/api/user/profile", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).send("Not authenticated");
+    }
+
+    const { firstName, lastName } = req.body;
+
+    if (!firstName || !lastName) {
+      return res.status(400).send("First name and last name are required");
+    }
+
+    try {
+      const [updatedUser] = await db
+        .update(users)
+        .set({
+          firstName,
+          lastName,
+        })
+        .where(eq(users.id, req.user.id))
+        .returning();
+
+      res.json(updatedUser);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      res.status(500).send("Failed to update profile");
+    }
+  });
+
+  // Update user password
+  app.put("/api/user/password", async (req, res) => {
+    if (!req.user) {
+      return res.status(401).send("Not authenticated");
+    }
+
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).send("Current password and new password are required");
+    }
+
+    try {
+      // Get current user with password
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, req.user.id));
+
+      if (!user) {
+        return res.status(404).send("User not found");
+      }
+
+      // Verify current password
+      const isMatch = await crypto.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).send("Current password is incorrect");
+      }
+
+      // Hash new password
+      const hashedPassword = await crypto.hash(newPassword);
+
+      // Update password
+      await db
+        .update(users)
+        .set({
+          password: hashedPassword,
+        })
+        .where(eq(users.id, req.user.id));
+
+      res.json({ message: "Password updated successfully" });
+    } catch (error) {
+      console.error('Error updating password:', error);
+      res.status(500).send("Failed to update password");
+    }
+  });
 
   // Get all libraries
   app.get("/api/libraries", async (_req, res) => {

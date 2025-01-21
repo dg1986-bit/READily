@@ -7,6 +7,7 @@ import BookDiscovery from "./pages/BookDiscovery";
 import BookDetails from "./pages/BookDetails";
 import Community from "./pages/Community";
 import MyShelf from "./pages/MyShelf";
+import UserSettings from "./pages/UserSettings";
 import NavigationBar from "./components/NavigationBar";
 
 function App() {
@@ -40,6 +41,9 @@ function App() {
           </Route>
           <Route path="/community">
             {user ? <Community /> : <AuthPage />}
+          </Route>
+          <Route path="/settings">
+            {user ? <UserSettings /> : <AuthPage />}
           </Route>
           <Route path="/auth" component={AuthPage} />
         </Switch>
