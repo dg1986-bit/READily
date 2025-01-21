@@ -6,6 +6,13 @@ import { books, posts, users, borrowings, libraries, reservations } from "@db/sc
 import { eq, and, isNull, count, lt, gte, ilike, or } from "drizzle-orm";
 import { addDays } from "date-fns";
 
+const AGE_GROUP_MAPPING = {
+  '0-2 years': ['infant', 'toddler'],
+  '3-5 years': ['preschool'],
+  '6-8 years': ['early-reader'],
+  '9-12 years': ['middle-grade']
+};
+
 export function registerRoutes(app: Express): Server {
   // First, setup authentication routes
   setupAuth(app);
@@ -48,11 +55,10 @@ export function registerRoutes(app: Express): Server {
       const conditions = [];
 
       // Handle age group filtering
-      if (ageGroup) {
+      if (ageGroup && AGE_GROUP_MAPPING[ageGroup]) {
         conditions.push(
           or(
-            eq(books.ageGroup, 'infant'),
-            eq(books.ageGroup, 'toddler')
+            ...AGE_GROUP_MAPPING[ageGroup].map(group => eq(books.ageGroup, group))
           )
         );
       }
