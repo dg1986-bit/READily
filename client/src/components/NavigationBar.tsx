@@ -10,7 +10,7 @@ export default function NavigationBar() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center space-x-8">
           <Link href="/">
-            <span className="text-xl font-bold text-primary cursor-pointer">Library Nest</span>
+            <span className="text-xl font-bold text-primary cursor-pointer">READily</span>
           </Link>
           <div className="hidden md:flex space-x-4">
             <Link href="/discover">

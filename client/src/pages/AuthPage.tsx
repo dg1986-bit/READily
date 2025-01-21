@@ -56,7 +56,7 @@ export default function AuthPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Library Nest</CardTitle>
+          <CardTitle className="text-2xl text-center">READily</CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login">

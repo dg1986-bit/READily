@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <div className="space-y-8">
       <section className="text-center space-y-4">
-        <h1 className="text-4xl font-bold text-gray-900">Welcome to Library Nest</h1>
+        <h1 className="text-4xl font-bold text-gray-900">Welcome to READily</h1>
         <p className="text-xl text-gray-600">Effortless borrowing, endless stories — your family's gateway to unlimited adventure.</p>
       </section>
 
