@@ -12,6 +12,8 @@ import { AlertCircle } from "lucide-react";
 type FormData = {
   email: string;
   password: string;
+  firstName?: string;
+  lastName?: string;
 };
 
 export default function AuthPage() {
@@ -20,10 +22,19 @@ export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const form = useForm<FormData>({
+  const loginForm = useForm<FormData>({
     defaultValues: {
       email: "",
       password: "",
+    },
+  });
+
+  const registerForm = useForm<FormData>({
+    defaultValues: {
+      email: "",
+      password: "",
+      firstName: "",
+      lastName: "",
     },
   });
 
@@ -75,18 +86,18 @@ export default function AuthPage() {
             )}
 
             <TabsContent value="login">
-              <form onSubmit={form.handleSubmit((data) => onSubmit(data, true))}>
+              <form onSubmit={loginForm.handleSubmit((data) => onSubmit(data, true))}>
                 <div className="space-y-4">
                   <Input
                     type="email"
                     placeholder="Email"
-                    {...form.register("email")}
+                    {...loginForm.register("email")}
                     disabled={isLoading}
                   />
                   <Input
                     type="password"
                     placeholder="Password"
-                    {...form.register("password")}
+                    {...loginForm.register("password")}
                     disabled={isLoading}
                   />
                   <Button className="w-full" disabled={isLoading}>
@@ -97,18 +108,30 @@ export default function AuthPage() {
             </TabsContent>
 
             <TabsContent value="register">
-              <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))}>
+              <form onSubmit={registerForm.handleSubmit((data) => onSubmit(data, false))}>
                 <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input
+                      placeholder="First Name"
+                      {...registerForm.register("firstName")}
+                      disabled={isLoading}
+                    />
+                    <Input
+                      placeholder="Last Name"
+                      {...registerForm.register("lastName")}
+                      disabled={isLoading}
+                    />
+                  </div>
                   <Input
                     type="email"
                     placeholder="Email"
-                    {...form.register("email")}
+                    {...registerForm.register("email")}
                     disabled={isLoading}
                   />
                   <Input
                     type="password"
                     placeholder="Password"
-                    {...form.register("password")}
+                    {...registerForm.register("password")}
                     disabled={isLoading}
                   />
                   <Button className="w-full" disabled={isLoading}>

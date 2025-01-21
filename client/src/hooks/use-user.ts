@@ -66,8 +66,8 @@ export function useUser() {
     retry: false
   });
 
-  const loginMutation = useMutation<RequestResult, Error, InsertUser>({
-    mutationFn: (userData) => handleRequest('/api/login', 'POST', userData),
+  const loginMutation = useMutation<RequestResult, Error, Omit<InsertUser, "firstName" | "lastName">>({
+    mutationFn: (userData) => handleRequest('/api/login', 'POST', userData as InsertUser),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user'] });
     },
