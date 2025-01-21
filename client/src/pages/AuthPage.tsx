@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useUser } from "@/hooks/use-user";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -9,12 +11,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
-type FormData = {
-  email: string;
-  password: string;
-  firstName?: string;
-  lastName?: string;
-};
+const loginSchema = z.object({
+  email: z.string().email("Please enter a valid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+const registerSchema = loginSchema.extend({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+});
+
+type FormData = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
   const { login, register } = useUser();
@@ -23,6 +30,7 @@ export default function AuthPage() {
   const [error, setError] = useState<string | null>(null);
 
   const loginForm = useForm<FormData>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -30,6 +38,7 @@ export default function AuthPage() {
   });
 
   const registerForm = useForm<FormData>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -111,29 +120,57 @@ export default function AuthPage() {
               <form onSubmit={registerForm.handleSubmit((data) => onSubmit(data, false))}>
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <Input
-                      placeholder="First Name"
-                      {...registerForm.register("firstName")}
-                      disabled={isLoading}
-                    />
-                    <Input
-                      placeholder="Last Name"
-                      {...registerForm.register("lastName")}
-                      disabled={isLoading}
-                    />
+                    <div>
+                      <Input
+                        placeholder="First Name"
+                        {...registerForm.register("firstName")}
+                        disabled={isLoading}
+                      />
+                      {registerForm.formState.errors.firstName && (
+                        <span className="text-xs text-red-500">
+                          {registerForm.formState.errors.firstName.message}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <Input
+                        placeholder="Last Name"
+                        {...registerForm.register("lastName")}
+                        disabled={isLoading}
+                      />
+                      {registerForm.formState.errors.lastName && (
+                        <span className="text-xs text-red-500">
+                          {registerForm.formState.errors.lastName.message}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <Input
-                    type="email"
-                    placeholder="Email"
-                    {...registerForm.register("email")}
-                    disabled={isLoading}
-                  />
-                  <Input
-                    type="password"
-                    placeholder="Password"
-                    {...registerForm.register("password")}
-                    disabled={isLoading}
-                  />
+                  <div>
+                    <Input
+                      type="email"
+                      placeholder="Email"
+                      {...registerForm.register("email")}
+                      disabled={isLoading}
+                    />
+                    {registerForm.formState.errors.email && (
+                      <span className="text-xs text-red-500">
+                        {registerForm.formState.errors.email.message}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <Input
+                      type="password"
+                      placeholder="Password"
+                      {...registerForm.register("password")}
+                      disabled={isLoading}
+                    />
+                    {registerForm.formState.errors.password && (
+                      <span className="text-xs text-red-500">
+                        {registerForm.formState.errors.password.message}
+                      </span>
+                    )}
+                  </div>
                   <Button className="w-full" disabled={isLoading}>
                     {isLoading ? "Creating account..." : "Create Account"}
                   </Button>
