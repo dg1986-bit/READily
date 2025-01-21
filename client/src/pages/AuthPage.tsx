@@ -3,7 +3,7 @@ import { useUser } from "@/hooks/use-user";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -29,13 +29,12 @@ export default function AuthPage() {
 
   const onSubmit = async (data: FormData, isLogin: boolean) => {
     setIsLoading(true);
-    setError(null); // Clear previous errors
+    setError(null);
     try {
       const result = await (isLogin ? login(data) : register(data));
       if (!result.ok) {
         setError(result.message);
         if (isLogin) {
-          // Show more user-friendly messages for common login errors
           if (result.message.includes("Incorrect email")) {
             setError("The email address you entered isn't connected to an account.");
           } else if (result.message.includes("Incorrect password")) {
@@ -57,6 +56,9 @@ export default function AuthPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl text-center">READily</CardTitle>
+          <CardDescription className="text-center">
+            A world of children's stories, delivered to your door
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login">
@@ -88,7 +90,7 @@ export default function AuthPage() {
                     disabled={isLoading}
                   />
                   <Button className="w-full" disabled={isLoading}>
-                    {isLoading ? "Signing in..." : "Sign In"}
+                    {isLoading ? "Logging in..." : "Login"}
                   </Button>
                 </div>
               </form>
