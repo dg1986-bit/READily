@@ -36,7 +36,7 @@ export default function NavigationBar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center space-x-1">
-                  <span>Hi, {user.firstName || user.email.split('@')[0]}</span>
+                  <span>Hi, {user.firstName}</span>
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
