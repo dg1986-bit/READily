@@ -38,8 +38,4 @@ This project requires the following environment variables:
 
 ## License
 
-[Your chosen license]
-
-## Contact
-
-[Your contact information]
+No license, default copyright laws apply
