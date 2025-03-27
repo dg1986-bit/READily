@@ -38,4 +38,4 @@ This project requires the following environment variables:
 
 ## License
 
-No license, default copyright laws apply
+No license, "All Rights Reserved" (copyrighted by default)
