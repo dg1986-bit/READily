@@ -16,6 +16,10 @@ Login:
 
 ![Login](./attached_assets/MVP%20login.png)
 
+Discover:
+
+![Discover](./attached_assets/MVP%20Discover.png)
+
 
 ## Vision
 
