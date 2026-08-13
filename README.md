@@ -2,9 +2,9 @@
 
 **A world of children's stories, delivered to your door.**
 
-Built solo by Dearlie Gilbert — product manager, prototyped using Replit's AI-assisted development environment as part of my hands-on exploration of AI-native product building, from concept through a working full-stack app.
+Built solo by Dearlie Gilbert — product manager, prototyped using Replit's AI-assisted development environment as part of my hands-on exploration of AI-native product building, from concept through a working Proof of Concept.
 
-**Status:** Prototype, not currently live. Screenshots below; happy to walk through the app live on request.
+**Status:** Prototype, not currently live. Screenshots below.
 
 ## Screenshots
 
