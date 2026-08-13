@@ -1,18 +1,43 @@
 # READily
 
-READily is an innovative digital platform designed to enhance early childhood literacy for families in Bangkok, providing a comprehensive library ecosystem for children aged newborn to 12 years old.
+**A world of children's stories, delivered to your door.**
 
-## About the Project
+Built solo by Dearlie Gilbert — product manager, prototyped using Replit's AI-assisted development environment as part of my hands-on exploration of AI-native product building, from concept through a working full-stack app.
 
-The platform offers a technology-driven approach to children's reading, featuring advanced book discovery, secure user experiences, and multicultural learning support through personalized recommendation algorithms and interactive features.
+**Status:** Prototype, not currently live. Screenshots below; happy to walk through the app live on request.
+
+## Screenshots
+
+<!-- ![Home screen](./attached_assets/screenshot-home.png) -->
+<!-- ![Book filtering by age group](./attached_assets/screenshot-filter.png) -->
+
+## Vision
+
+A unified library platform that connects every library in Thailand, letting moms discover, borrow, and return books effortlessly, anytime, anywhere. For kids from newborn to 12 years old, READily pairs a vast collection of age-appropriate books with integrated delivery, smart due-date notifications, and streamlined deposit refunds, making libraries accessible and borrowing stress-free for busy moms.
+
+## The Problem
+
+- No central database consolidating libraries across Thailand
+- No reliable book delivery system for libraries in Thailand (as of 2024)
+- Due dates and library contact are hard to track. I once traveled across Bangkok to return a book to the Art Library, only to find it closed for the day.
+
+## Edge (vs. library consolidation apps like Libby)
+
+- AI-powered book matcher for age-appropriate recommendations
+- Purpose-built for moms and kids' developmental needs, not a general-purpose library app
+- Community: moms sharing recommendations and support
+- Educational guidance on what's appropriate at each developmental stage, similar to Lovevery for toys
+- Two-tier business model: a membership fee for ad-hoc borrowing, and a subscription fee for curated books delivered monthly
 
 ## Features
 
+- **Tailored Picks** — age-appropriate, personalized recommendations to guide moms in nurturing their child's development
+- **Moms Together** — a space for moms to share recommendations and support each other
+- **Easy Borrowing** — integrated library collections, due-date notifications, and delivery
+- Age-based categories: 0-2, 3-5, 6-8, 9-12 years
 - User authentication and profile management
-- Age-based book filtering and recommendations (0-2, 3-5, 6-8, 9-12 years)
 - Book borrowing and reservation system
-- Multi-dimensional book filtering by age group, library, and subject
-- Community features for mothers to share experiences
+- Multi-dimensional filtering by age group, library, and subject
 
 ## Tech Stack
 
@@ -31,11 +56,10 @@ The platform offers a technology-driven approach to children's reading, featurin
 
 ## Environment Variables
 
-This project requires the following environment variables:
-
+This project requires:
 - `DATABASE_URL`: PostgreSQL connection string
 - `SESSION_SECRET`: Secret for session management
 
 ## License
 
-No license, "All Rights Reserved" (copyrighted by default)
+No license, "All Rights Reserved"
