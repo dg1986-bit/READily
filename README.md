@@ -24,6 +24,9 @@ My Shelf:
 
 ![My Shelf](./attached_assets/MVP%20my%20shelf.png)
 
+Community:
+
+![Community](./attached_assets/MVP%20Community.png)
 
 
 ## Vision
