@@ -4,7 +4,7 @@
 
 Built solo by Dearlie Gilbert — product manager, prototyped using Replit's AI-assisted development environment as part of my hands-on exploration of AI-native product building, from concept through a working Proof of Concept.
 
-**Status:** Prototype, not currently live. Screenshots below.
+**Status:** Prototype, not currently live. I relocated to Madrid after building this, so it's not something I'm running as a service, it's proof of work. Screenshots below.
 
 ## Screenshots
 
@@ -19,6 +19,7 @@ Login:
 Discover:
 
 ![Discover](./attached_assets/MVP%20Discover.png)
+*The AI-powered book matcher under Discover is a work in progress, being built separately with Claude Code as a hands-on exercise in AI-assisted development.*
 
 My Shelf:
 
