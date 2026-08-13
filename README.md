@@ -20,6 +20,11 @@ Discover:
 
 ![Discover](./attached_assets/MVP%20Discover.png)
 
+My Shelf:
+
+![My Shelf](./attached_assets/MVP%20my%20shelf.png)
+
+
 
 ## Vision
 
