@@ -8,8 +8,14 @@ Built solo by Dearlie Gilbert — product manager, prototyped using Replit's AI-
 
 ## Screenshots
 
+Home:
+
 ![Home screen](./attached_assets/MVP%20home.png)
-<!-- ![Book filtering by age group](./attached_assets/screenshot-filter.png) -->
+
+Login:
+
+![Login] (./attached_assets/MVP login.png)
+
 
 ## Vision
 
